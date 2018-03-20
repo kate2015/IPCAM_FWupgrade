@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace G_IPCAM
 {
@@ -34,15 +36,196 @@ namespace G_IPCAM
         private int _broadcastPort = 4950;
         private bool _shouldStop;
 
+        
         public Form1()
         {
             InitializeComponent();
+
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Interval = 10000;
+            timer.Enabled = true;
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);
+
         }
 
+        public void httprequest_timer(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            camera_info();
+            
+        }
+
+        void camera_info()
+        {
+            string HWresp_st = null;
+            String[] getSysInfoUri = new String[_supportDeviceNum];
+            HttpWebResponse netResp;
+            Stream sys_stream;
+
+            for (int i = 0; i < _supportDeviceNum; i++)
+            {
+                if (ipaddr[i] != null  ) // &&_alreadyDecideUpgradeStatus[i] == false
+                {
+                    getSysInfoUri[i] = string.Format("http://{0}/cgi-bin/system.cgi",ipaddr[i]);
+                    netResp = GethttpRequest(getSysInfoUri[i]);
+                    
+                    if (null != netResp)
+                    {
+                        HWresp_st = create_stream(netResp);
+                        sys_stream = GenerateStreamFromString(HWresp_st);
+                        f_sys_xml(sys_stream, i);
+                    }
+
+                }
+            }
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
+
+        private HttpWebResponse GethttpRequest(String S)
+        {
+
+            HttpWebResponse response = null;
+            HttpWebRequest request = null;
+            String login = "admin";
+            String passwd = "2100";
+
+            try
+            {
+                request = (HttpWebRequest)HttpWebRequest.Create(S);
+                NetworkCredential nc = new NetworkCredential(login, passwd);
+                request.Credentials = nc;
+                request.Method = "GET";
+                request.Timeout = 12000;    // time out value = 1 s.
+                request.KeepAlive = false;
+                request.Proxy = null;
+                response = (HttpWebResponse)request.GetResponse();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("error{0}", ex.Message);
+            }
+
+            return (response != null ? response : null);
+        }
+
+        private string create_stream(HttpWebResponse HWResp)
+        {
+            string StrRsp = null;
+            if (null != HWResp)
+            {
+                Stream receiveStream = HWResp.GetResponseStream();
+                StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+                StrRsp = readStream.ReadToEnd(); // Read the xxx.cgi xml 
+
+                receiveStream.Close();
+                readStream.Close();
+
+                HWResp.Close();
+                HWResp = null;
+            }
+            return StrRsp;
+        }
+
+        private Stream GenerateStreamFromString(string s)
+        {
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
+        }
+
+        public void f_sys_xml(Stream S, int devIdx)
+        {
+
+            XmlTextReader xmlReader = new XmlTextReader(S);
+            string md_name = null;
+            string fwVer = null;
+            DataGridViewRow row = dataGridView1.Rows[devIdx];
+
+            while (xmlReader.Read())
+            {
+                switch (xmlReader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        //listBox1.Items.Add("<" + xmlReader.Name + ">");
+
+                        switch (xmlReader.Name)
+                        {
+                            case "System":
+                                xmlReader.Read();
+                                if (xmlReader.Name.Equals("ModelName"))
+                                {
+                                    //xmlReader.Read();
+                                    //textBox_model.Text = xmlReader.Value;
+                                    //modelname = xmlReader.Value;
+                                }
+                                break;
+                            case "SkuName":
+                                if (xmlReader.Name.Equals("SkuName"))
+                                {
+                                    xmlReader.Read();
+                                    //md_type = xmlReader.Name;
+                                    switch (xmlReader.Value)
+                                    {
+                                        case "CA-NF21-N":
+                                            md_name = "CA-NF21-N";
+                                            break;
+                                        case "CA-NF21-W":
+                                            md_name = "CA-NF21-W";
+                                            break;
+                                        case "CA-NF21-WI":
+                                            md_name = "CA-NF21-WI";
+                                            break;
+                                    }
+                                    //md_name = dataGridView1.Rows[devIdx].Cells[1] ;
+                                    //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows[devIdx].Cells[1], (string) md_name; });
+                                    row.Cells[2].Value = md_name;
+                                }
+                                break;
+                            case "PartNumber":
+                                xmlReader.Read();
+                                //TextBox_partnum.Text = xmlReader.Value;
+                                //partnumber = xmlReader.Value;
+                                break;
+                            case "PCBASerialNumber":
+                                xmlReader.Read();
+                                // textBox_pcba.Text = xmlReader.Value;
+                                //pcbanumber = xmlReader.Value;
+                                break;
+                            case "SysSerialNumber":
+                                xmlReader.Read();
+                                //tb_serial.Text = xmlReader.Value;
+                                //sysserialnum = xmlReader.Value;
+                                break;
+                            case "FWVersion":
+                                xmlReader.Read();
+                                //tb_fwversion.Text = xmlReader.Value;
+                                row.Cells[4].Value = xmlReader.Value;
+                                break;
+                            case "LoadDefault":
+                                xmlReader.Read();
+                                //loaddefault = xmlReader.Value;
+                                break;
+                            case "MacAddress":
+                                xmlReader.Read();
+                                //this.textBox_macaddress.Nam = xmlReader.Value;
+                                row.Cells[3].Value = xmlReader.Value;
+                                break;
+                            case "Token":
+                                xmlReader.Read();
+                                //_token = xmlReader.Value;
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
+
 
         private void broadcast_fun()
         {
@@ -194,12 +377,14 @@ namespace G_IPCAM
             broadcast_fun();
 
             DialogResult r = MessageBox.Show("Trying to connect...");
+            
             if (r == DialogResult.OK)
             {
                 // Close the receive_broadcast_thread.
                 //MessageBox.Show(ipaddr[0].ToString());
                 //MessageBox.Show(ipaddr[1].ToString());
                 Stop_receive_broadcast_thread();
+
 
             }
 
@@ -224,8 +409,41 @@ namespace G_IPCAM
 
         private void button2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("PLease Select IPcamera first, then try again ");
+            
+            Int32 selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
+
+
+            if (selectedCellCount > 0)
+            {
+                if (dataGridView1.AreAllCellsSelected(true))
+                {
+                    MessageBox.Show("All cells are selected", "Selected Cells");
+                }
+                else
+                {
+                    System.Text.StringBuilder sb =
+                        new System.Text.StringBuilder();
+
+                    for (int i = 0;
+                        i < selectedCellCount; i++)
+                    {
+                        sb.Append("Row: ");
+                        sb.Append(dataGridView1.SelectedCells[i].RowIndex
+                            .ToString());
+                        sb.Append(", Column: ");
+                        sb.Append(dataGridView1.SelectedCells[i].ColumnIndex
+                            .ToString());
+                        sb.Append(Environment.NewLine);
+                    }
+
+                    sb.Append("Total: " + selectedCellCount.ToString());
+                    MessageBox.Show(sb.ToString(), "Selected Cells");
+                }
+            }
+            else {
+                MessageBox.Show("PLease Select IPcamera first, then try again ");
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)

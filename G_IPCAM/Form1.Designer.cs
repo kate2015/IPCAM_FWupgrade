@@ -36,14 +36,14 @@
             this.button3 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.label3 = new System.Windows.Forms.Label();
             this.No = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Subnet_Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label3 = new System.Windows.Forms.Label();
+            this.Subnet_Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -111,7 +111,6 @@
             this.button3.TabIndex = 3;
             this.button3.Text = "Upgrade Firmware";
             this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // groupBox2
             // 
@@ -131,14 +130,25 @@
             this.Column1,
             this.Column4,
             this.Column2,
-            this.Subnet_Mask,
             this.Column3,
-            this.Column5});
+            this.Column5,
+            this.Subnet_Mask});
             this.dataGridView1.Location = new System.Drawing.Point(33, 21);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 24;
             this.dataGridView1.Size = new System.Drawing.Size(744, 129);
             this.dataGridView1.TabIndex = 3;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.OrangeRed;
+            this.label3.Location = new System.Drawing.Point(16, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(89, 15);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "IP Camsera List";
             // 
             // No
             // 
@@ -160,11 +170,6 @@
             this.Column2.HeaderText = "Mac";
             this.Column2.Name = "Column2";
             // 
-            // Subnet_Mask
-            // 
-            this.Subnet_Mask.HeaderText = "Subnet Mask";
-            this.Subnet_Mask.Name = "Subnet_Mask";
-            // 
             // Column3
             // 
             this.Column3.HeaderText = "Firmware Version";
@@ -175,16 +180,10 @@
             this.Column5.HeaderText = "Status";
             this.Column5.Name = "Column5";
             // 
-            // label3
+            // Subnet_Mask
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.Color.OrangeRed;
-            this.label3.Location = new System.Drawing.Point(16, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(89, 15);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "IP Camsera List";
+            this.Subnet_Mask.HeaderText = "Subnet Mask";
+            this.Subnet_Mask.Name = "Subnet_Mask";
             // 
             // Form1
             // 
@@ -223,9 +222,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Subnet_Mask;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Subnet_Mask;
     }
 }
 
