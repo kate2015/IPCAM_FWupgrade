@@ -43,7 +43,6 @@
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Subnet_Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -111,6 +110,7 @@
             this.button3.TabIndex = 3;
             this.button3.Text = "Upgrade Firmware";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click_1);
             // 
             // groupBox2
             // 
@@ -131,12 +131,11 @@
             this.Column4,
             this.Column2,
             this.Column3,
-            this.Column5,
-            this.Subnet_Mask});
+            this.Column5});
             this.dataGridView1.Location = new System.Drawing.Point(33, 21);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(744, 129);
+            this.dataGridView1.Size = new System.Drawing.Size(760, 129);
             this.dataGridView1.TabIndex = 3;
             // 
             // label3
@@ -177,13 +176,8 @@
             // 
             // Column5
             // 
-            this.Column5.HeaderText = "Status";
+            this.Column5.HeaderText = "Excute Status";
             this.Column5.Name = "Column5";
-            // 
-            // Subnet_Mask
-            // 
-            this.Subnet_Mask.HeaderText = "Subnet Mask";
-            this.Subnet_Mask.Name = "Subnet_Mask";
             // 
             // Form1
             // 
@@ -224,7 +218,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Subnet_Mask;
     }
 }
 

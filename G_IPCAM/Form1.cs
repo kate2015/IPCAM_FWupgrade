@@ -20,7 +20,7 @@ namespace G_IPCAM
     {
         public int deviceNum = 0;
         private int _broadTimes = 5;
-        private int _supportDeviceNum = 0;
+        private int _supportDeviceNum = 5;
         private Broadcast _broadcastObject = new Broadcast();
         public String[] hostIps;
         public int supportDeviceNum = 100;
@@ -32,9 +32,10 @@ namespace G_IPCAM
         public String[] WebCam;
         public String hostIp;
         public dynamic stuff;
+        public byte[] fwFile = G_IPCAM.Properties.Resources.FixIPC_0013;
 
         private int _broadcastPort = 4950;
-        private bool _shouldStop;
+        private bool _shouldStop; 
 
         
         public Form1()
@@ -448,7 +449,46 @@ namespace G_IPCAM
 
         private void button3_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("PLease Select IPcamera first, then try again ");
+            MessageBox.Show("Please Select IPcamera first, then try again ");
         }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            Int32 selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
+
+            if (selectedCellCount > 0)
+            {
+                if (dataGridView1.AreAllCellsSelected(true))
+                {
+                    MessageBox.Show("All cells are selected", "Selected Cells");
+                }
+                else
+                {
+                    System.Text.StringBuilder sb =
+                        new System.Text.StringBuilder();
+
+                    for (int i = 0;
+                        i < selectedCellCount; i++)
+                    {
+                        sb.Append("Row: ");
+                        sb.Append(dataGridView1.SelectedCells[i].RowIndex
+                            .ToString());
+                        sb.Append(", Column: ");
+                        sb.Append(dataGridView1.SelectedCells[i].ColumnIndex
+                            .ToString());
+                        sb.Append(Environment.NewLine);
+                    }
+
+                    sb.Append("Total: " + selectedCellCount.ToString());
+                    MessageBox.Show(sb.ToString(), "Selected Cells");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please Select IPcamera first, then try again ");
+            }
+        }
+
+
     }
 }
