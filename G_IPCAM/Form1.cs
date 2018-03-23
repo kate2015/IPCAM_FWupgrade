@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace G_IPCAM
 {
     public partial class Form1 : Form
     {
-        public int deviceNum = 0;
+        public int deviceNum = 5;
         private int _broadTimes = 5;
         private int _supportDeviceNum = 5;
         private Broadcast _broadcastObject = new Broadcast();
@@ -27,6 +28,7 @@ namespace G_IPCAM
         public int supportNetInfNum = 100;
         public int count = 1;
         public int sum = 0;
+        public Int32 _uf_selectedCellCount;
         public String[] ipaddr;
         public String[] mac;
         public String[] WebCam;
@@ -35,9 +37,15 @@ namespace G_IPCAM
         public byte[] fwFile = G_IPCAM.Properties.Resources.FixIPC_0013;
 
         private int _broadcastPort = 4950;
-        private bool _shouldStop; 
+        private bool _shouldStop;
+        bool _initFlag = false;
+        public bool[] uploadFwReady;
+        public bool[] alreadyUploadFw;
+        public bool[] uploadFwStart;
+        private int[] _timeoutCnt;
 
-        
+        public string dev_fw;
+
         public Form1()
         {
             InitializeComponent();
@@ -59,6 +67,7 @@ namespace G_IPCAM
         {
             string HWresp_st = null;
             String[] getSysInfoUri = new String[_supportDeviceNum];
+            String[] getFwInfoUri = new String[_supportDeviceNum];
             HttpWebResponse netResp;
             Stream sys_stream;
 
@@ -66,14 +75,23 @@ namespace G_IPCAM
             {
                 if (ipaddr[i] != null  ) // &&_alreadyDecideUpgradeStatus[i] == false
                 {
+                    getFwInfoUri[i] = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?GetUpgradeStatus", ipaddr[i]);
                     getSysInfoUri[i] = string.Format("http://{0}/cgi-bin/system.cgi",ipaddr[i]);
+
                     netResp = GethttpRequest(getSysInfoUri[i]);
-                    
                     if (null != netResp)
                     {
                         HWresp_st = create_stream(netResp);
                         sys_stream = GenerateStreamFromString(HWresp_st);
                         f_sys_xml(sys_stream, i);
+                    }
+
+                    netResp = GethttpRequest(getFwInfoUri[i]);
+                    if (null != netResp)
+                    {
+                        HWresp_st = create_stream(netResp);
+                        sys_stream = GenerateStreamFromString(HWresp_st);
+                        parser_fw_upgrade_xml(sys_stream, i);
                     }
 
                 }
@@ -82,6 +100,51 @@ namespace G_IPCAM
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        public string http_post_binary(byte[] data, String endpoint)
+        {
+            String login = "admin";
+            String passwd = "2100";
+            if (null != data)
+            {
+                Console.WriteLine("POST {0}", endpoint);
+                var request = (HttpWebRequest)WebRequest.Create(endpoint);
+                NetworkCredential nc = new NetworkCredential(login, passwd);
+                request.Method = "POST";
+                request.Credentials = nc;
+                request.ContentType = "application/binary";
+                request.ContentLength = data.Length;
+                request.Timeout = 180000;
+                request.ContentLength = data.Length;
+                request.Proxy = null;
+                request.PreAuthenticate = true;
+                request.AuthenticationLevel = AuthenticationLevel.MutualAuthRequested;
+                string responseData = null;
+                try
+                {
+                    using (Stream requestStream = request.GetRequestStream())
+                    {
+                        requestStream.Write(data, 0, data.Length);
+                    }
+
+                    using (StreamReader responseStream = new StreamReader(request.GetResponse().GetResponseStream()))
+                    {
+                        responseData = responseStream.ReadToEnd();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("error:{0}", ex.ToString(), "\n");
+                    //_exceptionHandleObject.write_exception_log(ex.ToString());
+                    return null;
+                }
+
+                return responseData;
+
+            }
+
+            return null;
         }
 
         private HttpWebResponse GethttpRequest(String S)
@@ -205,7 +268,7 @@ namespace G_IPCAM
                                 break;
                             case "FWVersion":
                                 xmlReader.Read();
-                                //tb_fwversion.Text = xmlReader.Value;
+                                dev_fw = xmlReader.Value;
                                 row.Cells[4].Value = xmlReader.Value;
                                 break;
                             case "LoadDefault":
@@ -227,6 +290,197 @@ namespace G_IPCAM
             }
         }
 
+        public void parser_fw_upgrade_xml(Stream S, int devIdx)
+        {
+            DataGridViewRow row = dataGridView1.Rows[devIdx];
+            try
+            {
+                XmlTextReader xmlReader = new XmlTextReader(S);
+
+                while (xmlReader.Read())
+                {
+                    switch (xmlReader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            if (xmlReader.Name.Equals("UpgradeStatus"))
+                            {
+                                xmlReader.Read();
+                                switch (xmlReader.NodeType)
+                                {
+                                    case XmlNodeType.Text:
+                                        if (xmlReader.Value.Equals("Not upload Firmware"))
+                                        {
+                                            
+                                            row.Cells[5].Value = "excute status : wait"; //fwUpgradeStatusStr = "wait";
+                                            if (uploadFwStart[devIdx] == true)
+                                            {
+                                                _timeoutCnt[devIdx]++;
+                                            }
+                                        }
+                                        else if (xmlReader.Value.Equals("Burn Bootloader"))
+                                        {
+                                            row.Cells[5].Value = "excute status : 45%";//fwUpgradeStatusStr = "45%";
+                                        }
+                                        else if (xmlReader.Value.Equals("Burn Kernel"))
+                                        {
+                                            row.Cells[5].Value = "excute status : 60%";//fwUpgradeStatusStr = "60%";
+                                        }
+                                        else if (xmlReader.Value.Equals("Burn RootFs"))
+                                        {
+                                            row.Cells[5].Value = "excute status : 70%";//fwUpgradeStatusStr = "70%";
+                                        }
+                                        else if (xmlReader.Value.Equals("Burn App"))
+                                        {
+                                            row.Cells[5].Value = "excute status : 75%";//fwUpgradeStatusStr = "75%";
+                                        }
+                                        else if (xmlReader.Value.Equals("Burn Config"))
+                                        {
+                                            row.Cells[5].Value = "excute status : 99%";//fwUpgradeStatusStr = "99%";
+                                        }
+                                        else
+                                        {
+                                            row.Cells[5].Value = xmlReader.Value; //fwUpgradeStatusStr = xmlReader.Value;
+                                        }
+
+                                        if (xmlReader.Value.Equals("Success"))
+                                        {
+                                            /*if (_alreadyDecideUpgradeStatus[devIdx] == false)
+                                            {
+                                                _upgradeStatus[devIdx] = fwUpgradeStatusStr;
+                                                Console.WriteLine("[3]Success");
+                                                _alreadyDecideUpgradeStatus[devIdx] = true;
+                                                row.Cells[5].Value = "excute status : Success";
+                                            }*/
+                                            row.Cells[5].Value = "excute status : Success";
+                                            return;
+                                        }
+                                        else if (xmlReader.Value.Equals("Fail"))
+                                        {
+                                            /*if (string.Compare(dev_fw, _updateToFwVer.ToString().Trim()) == 0)
+                                            {
+                                                if (_alreadyDecideUpgradeStatus[devIdx] == false)
+                                                {
+                                                    if (doNotAutoExit == true)
+                                                    {
+                                                        _upgradeStatus[devIdx] = "The same \nversion does \nnot need to \nbe updated";
+                                                    }
+                                                    else
+                                                    {
+                                                        _upgradeStatus[devIdx] = "Success";
+                                                    }
+
+                                                    Console.WriteLine("[1]Success");
+                                                    _alreadyDecideUpgradeStatus[devIdx] = true;
+                                                    _sameFwVersionDoNotUpgrade[devIdx] = true;
+                                                    show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (_alreadyDecideUpgradeStatus[devIdx] == false)
+                                                {
+                                                    //_upgradeStatus[devIdx] = fwUpgradeStatusStr;
+                                                    _upgradeStatus[devIdx] = "Fail";
+                                                    Console.WriteLine("[2]Success");
+                                                    _alreadyDecideUpgradeStatus[devIdx] = true;
+                                                    show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
+                                                    _upgradeFail = true;
+                                                }
+                                            }*/
+                                            row.Cells[5].Value = "excute status : Fail";
+                                            MessageBox.Show("Fail1");
+                                            return;
+                                        }
+                                        else if (_timeoutCnt[devIdx] > 120)
+                                        {
+                                            MessageBox.Show("timoutCnt > 120");
+                                            /*if (_alreadyDecideUpgradeStatus[devIdx] == false)
+                                            {
+                                                //_upgradeStatus[devIdx] = "Timeout";
+                                                _upgradeStatus[devIdx] = "Fail";
+                                                Console.WriteLine("[6]Timeout");
+                                                _alreadyDecideUpgradeStatus[devIdx] = true;
+                                                _upgradeFail = true;
+                                                show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
+                                                return;
+                                            }*/
+                                            row.Cells[5].Value = "excute status : Timeout";
+                                        }
+                                        else
+                                        {
+
+                                            /*
+                                            if (_alreadyDecideUpgradeStatus[devIdx] == false)
+                                            {
+                                                show_status_on_form(_cnt, devIdx, fwUpgradeStatusStr);
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("???");
+                                                show_status_on_form(_cnt, devIdx, _upgradeStatus[devIdx]);
+                                            }*/
+                                            row.Cells[5].Value = "excute status : ???";
+                                        }
+                                        break;
+                                }
+                            }
+                            /*else if (xmlReader.Name.Equals("FWVersion"))
+                            {
+                                xmlReader.Read();
+                                switch (xmlReader.NodeType)
+                                {
+                                    case XmlNodeType.Text:
+                                        if (_catchDeviceInfo[devIdx] == false && _alreadyDecideUpgradeStatus[devIdx] == false)
+                                        {
+                                            fwVerLabel[devIdx].Text = String.Format("{0}", xmlReader.Value);
+                                            _catchDeviceInfo[devIdx] = true;
+                                            _uploadFwObject.uploadFwReady[devIdx] = true;
+                                        }
+                                        _fwInfoFwVer[devIdx] = String.Format("{0}", xmlReader.Value);
+
+                                        if (fwVerLabel[devIdx].Text.Equals((String)_updateToFwVer) && (alreadyUploadFw[devIdx] == true))
+                                        {
+                                            _uploadFwObject.uploadFwReady[devIdx] = false;
+                                            if (doNotAutoExit == true)
+                                            {
+                                                _upgradeStatus[devIdx] = "The same \nversion does \nnot need to \nbe updated";
+                                            }
+                                            else
+                                            {
+                                                _upgradeStatus[devIdx] = "Success";
+                                            }
+                                            Console.WriteLine("[4]Success");
+                                            _alreadyDecideUpgradeStatus[devIdx] = true;
+                                            show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
+                                            return;
+                                        }
+
+                                        break;
+                                }
+                            }*/
+                            else
+                            {
+                                //Console.WriteLine("[a]Name={0}", xmlReader.Name, "\n");
+                                row.Cells[5].Value = xmlReader.Name;
+
+                            }
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine("error:{0}", ex.ToString(), "\n");
+                //_exceptionHandleObject.write_exception_log(ex.ToString());
+                Console.WriteLine("[1]Timeout");
+                //_alreadyDecideUpgradeStatus[devIdx] = true;
+                //_upgradeStatus[devIdx] = "Timeout";
+                row.Cells[5].Value = "excute status : timeout";
+                //_upgradeStatus[devIdx] = "Fail";
+                //_upgradeFail = true;
+                //show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
+            }
+        }
 
         private void broadcast_fun()
         {
@@ -385,8 +639,6 @@ namespace G_IPCAM
                 //MessageBox.Show(ipaddr[0].ToString());
                 //MessageBox.Show(ipaddr[1].ToString());
                 Stop_receive_broadcast_thread();
-
-
             }
 
         }
@@ -454,9 +706,12 @@ namespace G_IPCAM
 
         private void button3_Click_1(object sender, EventArgs e)
         {
-            Int32 selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
+            //String select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
+            _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
-            if (selectedCellCount > 0)
+            contextMenuStrip1.Show(button3, 0, button3.Height);
+
+            if (_uf_selectedCellCount > 0)
             {
                 if (dataGridView1.AreAllCellsSelected(true))
                 {
@@ -464,23 +719,10 @@ namespace G_IPCAM
                 }
                 else
                 {
-                    System.Text.StringBuilder sb =
-                        new System.Text.StringBuilder();
 
-                    for (int i = 0;
-                        i < selectedCellCount; i++)
-                    {
-                        sb.Append("Row: ");
-                        sb.Append(dataGridView1.SelectedCells[i].RowIndex
-                            .ToString());
-                        sb.Append(", Column: ");
-                        sb.Append(dataGridView1.SelectedCells[i].ColumnIndex
-                            .ToString());
-                        sb.Append(Environment.NewLine);
-                    }
+                    upload_firmware();
+                    MessageBox.Show("Done Fwupgrade");
 
-                    sb.Append("Total: " + selectedCellCount.ToString());
-                    MessageBox.Show(sb.ToString(), "Selected Cells");
                 }
             }
             else
@@ -489,6 +731,56 @@ namespace G_IPCAM
             }
         }
 
+        public void upload_firmware()
+        {
+            int i = 0;
+            int j = 0;
+            int retryNum = 2;
+            string responsData;
+            String select_index;
+            String _fwUpgradeUri;
+            _initFlag = true;
 
+            //must check fw version of FwUpgrade0.write_log. at FwUpgrade.cs, keyword: "_updateToFwVer"
+            //while (_initFlag) //!_shouldStop && 
+            //{
+            //for (i = 0; i < _uf_selectedCellCount; i++)
+            //{
+            select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
+                    //MessageBox.Show(select_index, "Selected Cells");
+
+                    //if (alreadyUploadFw[i] == false && ipaddr[i] != null && uploadFwReady[i] == true)
+                    if ( ipaddr[i] != null)
+                    {
+                        _fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddr[i]);
+                        //uploadFwStart[i] = true;
+                        for (j = 0; j < retryNum; j++)
+                        {
+                            responsData = http_post_binary(fwFile, _fwUpgradeUri);
+                            Console.WriteLine("ip: {0}, status = {1}", ipaddr[i], responsData);
+                            if (responsData == null)
+                            {
+                                Console.WriteLine("ip : {0} get null, retry", ipaddr[i]);
+                                continue;
+                            }
+                            if (responsData.Equals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><status>fail</status>Not upload Firmware"))
+                            {
+                                Console.WriteLine("ip : {0}, retry", ipaddr[i]);
+                            }
+                            else
+                                break;
+                        }
+                    //alreadyUploadFw[i] = true;
+                    
+                    }
+                //}
+            //}
+            Console.WriteLine("UploadFirmware thread: terminating.");
+        }
+
+        private void contextMenuStrip1_Opened(object sender, EventArgs e)
+        {
+
+        }
     }
 }
