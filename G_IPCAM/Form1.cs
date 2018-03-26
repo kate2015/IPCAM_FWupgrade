@@ -33,6 +33,7 @@ namespace G_IPCAM
         public String[] mac;
         public String[] WebCam;
         public String hostIp;
+        string md_name ;
         public dynamic stuff;
         //public byte[] = G_IPCAM.Properties.Resources.;
         public byte[] fwFile;
@@ -58,6 +59,21 @@ namespace G_IPCAM
 
         }
 
+        public Form1(string strTextMsg)
+        {
+            InitializeComponent();
+            md_name = strTextMsg;
+        }
+
+        public string textBoxMsg
+        {
+            set {
+                md_name = value;
+            }
+            get {
+                return md_name;
+            }
+        }
         public void httprequest_timer(object sender, System.Timers.ElapsedEventArgs e)
         {
             camera_info();
@@ -209,7 +225,7 @@ namespace G_IPCAM
         {
 
             XmlTextReader xmlReader = new XmlTextReader(S);
-            string md_name = null;
+           
             string fwVer = null;
             DataGridViewRow row = dataGridView1.Rows[devIdx];
 
@@ -251,6 +267,7 @@ namespace G_IPCAM
                                     //md_name = dataGridView1.Rows[devIdx].Cells[1] ;
                                     //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows[devIdx].Cells[1], (string) md_name; });
                                     row.Cells[2].Value = md_name;
+                                    
                                 }
                                 break;
                             case "PartNumber":
@@ -530,7 +547,8 @@ namespace G_IPCAM
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            Modify_ip obj = new Modify_ip();
+            
             Int32 selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
 
@@ -546,7 +564,7 @@ namespace G_IPCAM
                     System.Text.StringBuilder sb =
                         new System.Text.StringBuilder();
 
-                    for (int i = 0;
+                    /*for (int i = 0;
                         i < selectedCellCount; i++)
                     {
                         sb.Append("Row: ");
@@ -557,9 +575,13 @@ namespace G_IPCAM
                             .ToString());
                         sb.Append(Environment.NewLine);
                     }
-
-                    sb.Append("Total: " + selectedCellCount.ToString());
+                    
+                  sb.Append("Total: " + selectedCellCount.ToString());
                     MessageBox.Show(sb.ToString(), "Selected Cells");
+                 */
+                    //obj.tb = md_name;
+                    obj.Show();
+
                 }
             }
             else {
