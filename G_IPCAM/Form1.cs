@@ -34,7 +34,8 @@ namespace G_IPCAM
         public String[] WebCam;
         public String hostIp;
         public dynamic stuff;
-        public byte[] fwFile = G_IPCAM.Properties.Resources.FixIPC_0013;
+        //public byte[] = G_IPCAM.Properties.Resources.;
+        public byte[] fwFile;
 
         private int _broadcastPort = 4950;
         private bool _shouldStop;
@@ -51,7 +52,7 @@ namespace G_IPCAM
             InitializeComponent();
 
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 10000;
+            timer.Interval = 1000;
             timer.Enabled = true;
             timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);
 
@@ -169,7 +170,8 @@ namespace G_IPCAM
             }
             catch (Exception ex)
             {
-                MessageBox.Show("error{0}", ex.Message);
+                Console.WriteLine("GethttpRequest error:{0}", ex.ToString(), "\n");
+                return null;
             }
 
             return (response != null ? response : null);
@@ -293,193 +295,59 @@ namespace G_IPCAM
         public void parser_fw_upgrade_xml(Stream S, int devIdx)
         {
             DataGridViewRow row = dataGridView1.Rows[devIdx];
-            try
+            XmlTextReader xmlReader = new XmlTextReader(S);
+                
+
+            while (xmlReader.Read())
             {
-                XmlTextReader xmlReader = new XmlTextReader(S);
-
-                while (xmlReader.Read())
+                switch (xmlReader.NodeType)
                 {
-                    switch (xmlReader.NodeType)
-                    {
-                        case XmlNodeType.Element:
-                            if (xmlReader.Name.Equals("UpgradeStatus"))
-                            {
+                    case XmlNodeType.Element:
+                        switch (xmlReader.Name)
+                        {
+                            case "fw-upgrade":
                                 xmlReader.Read();
-                                switch (xmlReader.NodeType)
+                                if (xmlReader.Name.Equals("UpgradeStatus"))
                                 {
-                                    case XmlNodeType.Text:
-                                        if (xmlReader.Value.Equals("Not upload Firmware"))
-                                        {
-                                            
-                                            row.Cells[5].Value = "excute status : wait"; //fwUpgradeStatusStr = "wait";
-                                            if (uploadFwStart[devIdx] == true)
-                                            {
-                                                _timeoutCnt[devIdx]++;
-                                            }
-                                        }
-                                        else if (xmlReader.Value.Equals("Burn Bootloader"))
-                                        {
-                                            row.Cells[5].Value = "excute status : 45%";//fwUpgradeStatusStr = "45%";
-                                        }
-                                        else if (xmlReader.Value.Equals("Burn Kernel"))
-                                        {
-                                            row.Cells[5].Value = "excute status : 60%";//fwUpgradeStatusStr = "60%";
-                                        }
-                                        else if (xmlReader.Value.Equals("Burn RootFs"))
-                                        {
-                                            row.Cells[5].Value = "excute status : 70%";//fwUpgradeStatusStr = "70%";
-                                        }
-                                        else if (xmlReader.Value.Equals("Burn App"))
-                                        {
-                                            row.Cells[5].Value = "excute status : 75%";//fwUpgradeStatusStr = "75%";
-                                        }
-                                        else if (xmlReader.Value.Equals("Burn Config"))
-                                        {
-                                            row.Cells[5].Value = "excute status : 99%";//fwUpgradeStatusStr = "99%";
-                                        }
-                                        else
-                                        {
-                                            row.Cells[5].Value = xmlReader.Value; //fwUpgradeStatusStr = xmlReader.Value;
-                                        }
-
-                                        if (xmlReader.Value.Equals("Success"))
-                                        {
-                                            /*if (_alreadyDecideUpgradeStatus[devIdx] == false)
-                                            {
-                                                _upgradeStatus[devIdx] = fwUpgradeStatusStr;
-                                                Console.WriteLine("[3]Success");
-                                                _alreadyDecideUpgradeStatus[devIdx] = true;
-                                                row.Cells[5].Value = "excute status : Success";
-                                            }*/
-                                            row.Cells[5].Value = "excute status : Success";
-                                            return;
-                                        }
-                                        else if (xmlReader.Value.Equals("Fail"))
-                                        {
-                                            /*if (string.Compare(dev_fw, _updateToFwVer.ToString().Trim()) == 0)
-                                            {
-                                                if (_alreadyDecideUpgradeStatus[devIdx] == false)
-                                                {
-                                                    if (doNotAutoExit == true)
-                                                    {
-                                                        _upgradeStatus[devIdx] = "The same \nversion does \nnot need to \nbe updated";
-                                                    }
-                                                    else
-                                                    {
-                                                        _upgradeStatus[devIdx] = "Success";
-                                                    }
-
-                                                    Console.WriteLine("[1]Success");
-                                                    _alreadyDecideUpgradeStatus[devIdx] = true;
-                                                    _sameFwVersionDoNotUpgrade[devIdx] = true;
-                                                    show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (_alreadyDecideUpgradeStatus[devIdx] == false)
-                                                {
-                                                    //_upgradeStatus[devIdx] = fwUpgradeStatusStr;
-                                                    _upgradeStatus[devIdx] = "Fail";
-                                                    Console.WriteLine("[2]Success");
-                                                    _alreadyDecideUpgradeStatus[devIdx] = true;
-                                                    show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
-                                                    _upgradeFail = true;
-                                                }
-                                            }*/
-                                            row.Cells[5].Value = "excute status : Fail";
-                                            MessageBox.Show("Fail1");
-                                            return;
-                                        }
-                                        else if (_timeoutCnt[devIdx] > 120)
-                                        {
-                                            MessageBox.Show("timoutCnt > 120");
-                                            /*if (_alreadyDecideUpgradeStatus[devIdx] == false)
-                                            {
-                                                //_upgradeStatus[devIdx] = "Timeout";
-                                                _upgradeStatus[devIdx] = "Fail";
-                                                Console.WriteLine("[6]Timeout");
-                                                _alreadyDecideUpgradeStatus[devIdx] = true;
-                                                _upgradeFail = true;
-                                                show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
-                                                return;
-                                            }*/
-                                            row.Cells[5].Value = "excute status : Timeout";
-                                        }
-                                        else
-                                        {
-
-                                            /*
-                                            if (_alreadyDecideUpgradeStatus[devIdx] == false)
-                                            {
-                                                show_status_on_form(_cnt, devIdx, fwUpgradeStatusStr);
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine("???");
-                                                show_status_on_form(_cnt, devIdx, _upgradeStatus[devIdx]);
-                                            }*/
-                                            row.Cells[5].Value = "excute status : ???";
-                                        }
-                                        break;
+                                    xmlReader.Read();
+                                    switch (xmlReader.Value)
+                                    {
+                                        case "Not upload Firmware":
+                                            row.Cells[5].Value = "Excute status : OK"; //fwUpgradeStatusStr = "wait";
+                                            break;
+                                        case "Burn Bootloader":
+                                            row.Cells[5].Value = "Excute status : 15%...burning";//fwUpgradeStatusStr = "45%";
+                                            break;
+                                        case "Burn Kernel":
+                                            row.Cells[5].Value = "Excute status : 20%...burning";//fwUpgradeStatusStr = "60%";
+                                            break;
+                                        case "Burn RootFs":
+                                            row.Cells[5].Value = "Excute status : 30%...burning";//fwUpgradeStatusStr = "70%";
+                                            break;
+                                        case "Burn App":
+                                            row.Cells[5].Value = "Excute status : 85%...burning";//fwUpgradeStatusStr = "75%";
+                                            break;
+                                        case "Burn Config":
+                                            row.Cells[5].Value = "Excute status : 99%";//fwUpgradeStatusStr = "99%";
+                                            break;
+                                        case "Success":
+                                            row.Cells[5].Value = "Excute status : Almost Success ...waiting for reboot";
+                                            break;
+                                        case "Fail":
+                                            row.Cells[5].Value = "Excute status : Fail";
+                                            break;
+                                        default:
+                                            row.Cells[5].Value = "excute status : Waiting";
+                                            break;
+                                    }
                                 }
-                            }
-                            /*else if (xmlReader.Name.Equals("FWVersion"))
-                            {
-                                xmlReader.Read();
-                                switch (xmlReader.NodeType)
-                                {
-                                    case XmlNodeType.Text:
-                                        if (_catchDeviceInfo[devIdx] == false && _alreadyDecideUpgradeStatus[devIdx] == false)
-                                        {
-                                            fwVerLabel[devIdx].Text = String.Format("{0}", xmlReader.Value);
-                                            _catchDeviceInfo[devIdx] = true;
-                                            _uploadFwObject.uploadFwReady[devIdx] = true;
-                                        }
-                                        _fwInfoFwVer[devIdx] = String.Format("{0}", xmlReader.Value);
-
-                                        if (fwVerLabel[devIdx].Text.Equals((String)_updateToFwVer) && (alreadyUploadFw[devIdx] == true))
-                                        {
-                                            _uploadFwObject.uploadFwReady[devIdx] = false;
-                                            if (doNotAutoExit == true)
-                                            {
-                                                _upgradeStatus[devIdx] = "The same \nversion does \nnot need to \nbe updated";
-                                            }
-                                            else
-                                            {
-                                                _upgradeStatus[devIdx] = "Success";
-                                            }
-                                            Console.WriteLine("[4]Success");
-                                            _alreadyDecideUpgradeStatus[devIdx] = true;
-                                            show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
-                                            return;
-                                        }
-
-                                        break;
-                                }
-                            }*/
-                            else
-                            {
-                                //Console.WriteLine("[a]Name={0}", xmlReader.Name, "\n");
-                                row.Cells[5].Value = xmlReader.Name;
-
-                            }
-                            break;
-                    }
+                                break;
+                        }
+                     break;
                 }
             }
-            catch (Exception ex)
-            {
-                //Console.WriteLine("error:{0}", ex.ToString(), "\n");
-                //_exceptionHandleObject.write_exception_log(ex.ToString());
-                Console.WriteLine("[1]Timeout");
-                //_alreadyDecideUpgradeStatus[devIdx] = true;
-                //_upgradeStatus[devIdx] = "Timeout";
-                row.Cells[5].Value = "excute status : timeout";
-                //_upgradeStatus[devIdx] = "Fail";
-                //_upgradeFail = true;
-                //show_status_on_form(0, devIdx, _upgradeStatus[devIdx]);
-            }
+            
+            
         }
 
         private void broadcast_fun()
@@ -631,7 +499,7 @@ namespace G_IPCAM
 
             broadcast_fun();
 
-            DialogResult r = MessageBox.Show("Trying to connect...");
+            DialogResult r = MessageBox.Show("Trying to connect...  Press OK STOP Search");
             
             if (r == DialogResult.OK)
             {
@@ -662,7 +530,7 @@ namespace G_IPCAM
 
         private void button2_Click(object sender, EventArgs e)
         {
-            
+
             Int32 selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
 
@@ -709,8 +577,6 @@ namespace G_IPCAM
             //String select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
             _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
-            contextMenuStrip1.Show(button3, 0, button3.Height);
-
             if (_uf_selectedCellCount > 0)
             {
                 if (dataGridView1.AreAllCellsSelected(true))
@@ -720,14 +586,61 @@ namespace G_IPCAM
                 else
                 {
 
+                    DialogResult r = MessageBox.Show("Press OK to choose update firware file", "Update Firmware Dialog", MessageBoxButtons.OK);
+                    if (r == DialogResult.OK)
+                    {
+                        // Close the receive_broadcast_thread.
+                        //MessageBox.Show(ipaddr[0].ToString());
+                        //MessageBox.Show(ipaddr[1].ToString());
+                        Open_Firmware_file();
+                        Stop_receive_broadcast_thread();
+                    }
                     upload_firmware();
-                    MessageBox.Show("Done Fwupgrade");
-
+                    //MessageBox.Show("Done Fw upgrade");
                 }
             }
             else
             {
                 MessageBox.Show("Please Select IPcamera first, then try again ");
+            }
+        }
+
+        public void Open_Firmware_file()
+        {
+            int size = -1;
+            //object openFileDialog1 = null;
+
+            var FD = new System.Windows.Forms.OpenFileDialog();
+            DialogResult result = FD.ShowDialog(); // Show the dialog.
+            if (result == DialogResult.OK) // Test result.
+            {
+                string filename = FD.FileName;
+                var s = new StringBuilder();
+
+                try
+                {
+                    byte[] filebytes = File.ReadAllBytes(filename);
+
+
+                    fwFile = filebytes;
+                    //textBox_filepath.Text = file;
+                    //fwFile = System.Text.Encoding.Default.GetBytes(file);
+
+                    /*
+                    
+                    byte[] bytes = new byte[text.Length * sizeof(char)];
+                    System.Buffer.BlockCopy(text.ToCharArray(), 0, bytes, 0, bytes.Length);
+                    fwFile = bytes;*/
+
+                    //fwFile = System.Text.ASCIIEncoding.Default.GetBytes(file);
+                    //fwFile = EncodeToBytes(text);
+
+
+                }
+                catch (Win32Exception ex)
+                {
+                    MessageBox.Show("error" + ex.Message);
+                }
             }
         }
 
@@ -778,9 +691,6 @@ namespace G_IPCAM
             Console.WriteLine("UploadFirmware thread: terminating.");
         }
 
-        private void contextMenuStrip1_Opened(object sender, EventArgs e)
-        {
-
-        }
+        
     }
 }
