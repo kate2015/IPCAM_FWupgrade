@@ -110,7 +110,7 @@ namespace G_IPCAM
         }*/
         public void RequestStop()
         {
-            _shouldStop = true;
+            //_shouldStop = true;
         }
         public void broadcast_msg_str(string message, int port)
         {
@@ -141,6 +141,6 @@ namespace G_IPCAM
             }
         }
 
-        private volatile bool _shouldStop;
+        //private volatile bool _shouldStop;
     }
 }

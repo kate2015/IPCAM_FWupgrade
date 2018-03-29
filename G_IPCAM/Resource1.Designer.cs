@@ -59,15 +59,5 @@ namespace G_IPCAM {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] FixIPC_0013 {
-            get {
-                object obj = ResourceManager.GetObject("FixIPC_0013", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }

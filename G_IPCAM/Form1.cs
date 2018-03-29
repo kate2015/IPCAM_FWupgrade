@@ -39,13 +39,14 @@ namespace G_IPCAM
         public byte[] fwFile;
 
         private int _broadcastPort = 4950;
-        private bool _shouldStop;
+        private bool _Stop_scan = false;
         bool _initFlag = false;
         public bool[] uploadFwReady;
         public bool[] alreadyUploadFw;
         public bool[] uploadFwStart;
-        private int[] _timeoutCnt;
+        //private int[] _timeoutCnt;
 
+        Thread _recvBroadcastThread;
         public string dev_fw;
 
         public Form1()
@@ -57,23 +58,15 @@ namespace G_IPCAM
             timer.Enabled = true;
             timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);
 
+            
         }
 
         public Form1(string strTextMsg)
         {
             InitializeComponent();
-            md_name = strTextMsg;
         }
 
-        public string textBoxMsg
-        {
-            set {
-                md_name = value;
-            }
-            get {
-                return md_name;
-            }
-        }
+        
         public void httprequest_timer(object sender, System.Timers.ElapsedEventArgs e)
         {
             camera_info();
@@ -225,8 +218,8 @@ namespace G_IPCAM
         {
 
             XmlTextReader xmlReader = new XmlTextReader(S);
-           
-            string fwVer = null;
+            Modify_ip IForm = new Modify_ip();
+            IForm.Owner = this;
             DataGridViewRow row = dataGridView1.Rows[devIdx];
 
             while (xmlReader.Read())
@@ -350,8 +343,11 @@ namespace G_IPCAM
                                         case "Success":
                                             row.Cells[5].Value = "Excute status : Almost Success ...waiting for reboot";
                                             break;
-                                        case "Fail":
+                                        case "fail":
                                             row.Cells[5].Value = "Excute status : Fail";
+                                            break;
+                                        case "Invalid fw image":
+                                            row.Cells[5].Value = "Excute status : Invalid fw image ... Fail";
                                             break;
                                         default:
                                             row.Cells[5].Value = "excute status : Waiting";
@@ -406,9 +402,10 @@ namespace G_IPCAM
 
         public void receive_broadcast_thread()
         {
-
+            
             bool findSameMac = false;
             int i = 0;
+            String macAddr;
 
             ipaddr = new String[supportDeviceNum];
             mac = new String[supportDeviceNum];
@@ -421,18 +418,25 @@ namespace G_IPCAM
                 WebCam[i] = null;
             }
 
-            IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _broadcastPort);
 
-            Socket newsock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            
+                IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _broadcastPort);
 
-            newsock.Bind(ipep);
+                Socket newsock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-            EndPoint Remote = (EndPoint)(sender);
-            String macAddr;
 
-            try {
-                while (!_shouldStop)
+                newsock.Bind(ipep);
+
+
+
+                IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+                EndPoint Remote = (EndPoint)(sender);
+            
+            
+
+            try
+            {
+                while (!_Stop_scan)
                 {
                     byte[] data = new byte[1024];
                     try
@@ -475,7 +479,8 @@ namespace G_IPCAM
                                     Console.WriteLine("mac = {0}", (String)stuff.mac);
                                     Console.WriteLine("nitaa{0} ipaddr = {1}", i, (String)stuff.ip);
 
-                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, (String)stuff.ip); });
+                                    //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, (String)stuff.ip); });
+                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, ipaddr[i]); });
 
                                     deviceNum++;
                                 }
@@ -485,6 +490,9 @@ namespace G_IPCAM
                     }
                     catch (Exception ex)
                     {
+                        //newsock.Shutdown(newsock);
+                        newsock.Close();
+                        
                         Console.WriteLine("error:{0}", ex.ToString(), "\n");
                         //_exceptionHandleObject.write_exception_log(ex.ToString());
                         System.Environment.Exit(-12);
@@ -493,100 +501,90 @@ namespace G_IPCAM
             }
             catch (ThreadAbortException exception)
             {
+                
                 Console.WriteLine("Exception message:{0}", exception.Message);
+                
+
+            }
+            finally {
                 Thread.ResetAbort();
+                
             }
             
             Console.WriteLine("broadcaster thread: terminating.");
+            newsock.Close();
             
         }
 
-        void Stop_receive_broadcast_thread()
+        public void Stop_receive_broadcast_thread()
         {
-            _shouldStop = true;
+           
+            _Stop_scan = true;
+            _recvBroadcastThread = null;
+            Dispose();
+            GC.SuppressFinalize(this);
+            //_recvBroadcastThread
+
         }
+
+        
 
         public void button1_Click(object sender, EventArgs e)
         {
-            Thread _recvBroadcastThread = new Thread(receive_broadcast_thread);
+
+            dataGridView1.Rows.Clear();
+            //_recvBroadcastThread = null;
+            //_recvBroadcastThread = new Thread(receive_broadcast_thread);
+            //_recvBroadcastThread.Start();
+
+
+            if (_recvBroadcastThread == null) {
+                _recvBroadcastThread = new Thread(receive_broadcast_thread);
+                _recvBroadcastThread.Start();
+            }
+
+            
 
             _supportDeviceNum = _broadcastObject.supportDeviceNum;
             _broadcastObject.hostIps = new String[_broadcastObject.supportNetInfNum];//for multi interface case
-            _recvBroadcastThread.Start();
+            
 
             broadcast_fun();
 
-            DialogResult r = MessageBox.Show("Trying to connect...  Press OK STOP Search");
-            
-            if (r == DialogResult.OK)
-            {
-                // Close the receive_broadcast_thread.
-                //MessageBox.Show(ipaddr[0].ToString());
-                //MessageBox.Show(ipaddr[1].ToString());
-                Stop_receive_broadcast_thread();
-            }
 
+
+            Try_connect IForm = new Try_connect();
+            IForm.Owner = this;
+            IForm.Show();
+            
         }
 
-        /*private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            const string message =
-                "Are you sure that you would like to close the form?";
-            const string caption = "Form Closing";
-            var result = MessageBox.Show(message, caption,
-                                         MessageBoxButtons.YesNo,
-                                         MessageBoxIcon.Exclamation);
 
-            // If the no button was pressed ...
-            if (result == DialogResult.No)
+        public void button2_Click(object sender, EventArgs e)
+        {
+            _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
+
+            if (_uf_selectedCellCount > 0)
             {
-                // cancel the closure of the form.
-                e.Cancel = true;
-            }
-        }*/
+                Modify_ip IForm = new Modify_ip();
+                DataGridViewRow row = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex];
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            Modify_ip obj = new Modify_ip();
+                //IForm.String1 = md_name;
+                //IForm.String1 = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells[2].ToString();
+                IForm.String1 = row.Cells[2].Value.ToString();
+                IForm.String2 = row.Cells[1].Value.ToString();  //Need Error handling
+                IForm.SetValue();
+                IForm.Show();
+
+                
+
+            }
+            else
+            {
+                MessageBox.Show("Please Select IPcamera first, then try again ");
+            }
+
             
-            Int32 selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
-
-
-
-            if (selectedCellCount > 0)
-            {
-                if (dataGridView1.AreAllCellsSelected(true))
-                {
-                    MessageBox.Show("All cells are selected", "Selected Cells");
-                }
-                else
-                {
-                    System.Text.StringBuilder sb =
-                        new System.Text.StringBuilder();
-
-                    /*for (int i = 0;
-                        i < selectedCellCount; i++)
-                    {
-                        sb.Append("Row: ");
-                        sb.Append(dataGridView1.SelectedCells[i].RowIndex
-                            .ToString());
-                        sb.Append(", Column: ");
-                        sb.Append(dataGridView1.SelectedCells[i].ColumnIndex
-                            .ToString());
-                        sb.Append(Environment.NewLine);
-                    }
-                    
-                  sb.Append("Total: " + selectedCellCount.ToString());
-                    MessageBox.Show(sb.ToString(), "Selected Cells");
-                 */
-                    //obj.tb = md_name;
-                    obj.Show();
-
-                }
-            }
-            else {
-                MessageBox.Show("PLease Select IPcamera first, then try again ");
-            }
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -594,7 +592,7 @@ namespace G_IPCAM
             MessageBox.Show("Please Select IPcamera first, then try again ");
         }
 
-        private void button3_Click_1(object sender, EventArgs e)
+        public void button3_Click_1(object sender, EventArgs e)
         {
             //String select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
             _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
@@ -674,7 +672,12 @@ namespace G_IPCAM
             string responsData;
             String select_index;
             String _fwUpgradeUri;
+            string ipaddr;
             _initFlag = true;
+
+            DataGridViewRow row = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex];
+            ipaddr = row.Cells[1].Value.ToString();
+
 
             //must check fw version of FwUpgrade0.write_log. at FwUpgrade.cs, keyword: "_updateToFwVer"
             //while (_initFlag) //!_shouldStop && 
@@ -685,9 +688,11 @@ namespace G_IPCAM
                     //MessageBox.Show(select_index, "Selected Cells");
 
                     //if (alreadyUploadFw[i] == false && ipaddr[i] != null && uploadFwReady[i] == true)
-                    if ( ipaddr[i] != null)
+                    //if ( ipaddr[i] != null)
+                    if ( ipaddr != null)
                     {
-                        _fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddr[i]);
+                        //_fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddr[i]);
+                        _fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddr);
                         //uploadFwStart[i] = true;
                         for (j = 0; j < retryNum; j++)
                         {
