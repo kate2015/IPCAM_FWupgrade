@@ -420,18 +420,17 @@ namespace G_IPCAM
 
 
             
-                IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _broadcastPort);
+            IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _broadcastPort);
 
-                Socket newsock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-
-                newsock.Bind(ipep);
+            Socket newsock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
 
+            newsock.Bind(ipep);
 
-                IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-                EndPoint Remote = (EndPoint)(sender);
-            
+
+
+            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+            EndPoint Remote = (EndPoint)(sender);
             
 
             try
@@ -491,7 +490,7 @@ namespace G_IPCAM
                     catch (Exception ex)
                     {
                         //newsock.Shutdown(newsock);
-                        newsock.Close();
+                        //newsock.Close();
                         
                         Console.WriteLine("error:{0}", ex.ToString(), "\n");
                         //_exceptionHandleObject.write_exception_log(ex.ToString());
@@ -506,13 +505,13 @@ namespace G_IPCAM
                 
 
             }
-            finally {
+            /*finally {
                 Thread.ResetAbort();
                 
-            }
+            }*/
             
             Console.WriteLine("broadcaster thread: terminating.");
-            newsock.Close();
+            //newsock.Close();
             
         }
 
@@ -520,9 +519,9 @@ namespace G_IPCAM
         {
            
             _Stop_scan = true;
-            _recvBroadcastThread = null;
-            Dispose();
-            GC.SuppressFinalize(this);
+           // _recvBroadcastThread = null;
+            //Dispose();
+            //GC.SuppressFinalize(this);
             //_recvBroadcastThread
 
         }
@@ -532,18 +531,16 @@ namespace G_IPCAM
         public void button1_Click(object sender, EventArgs e)
         {
 
-            dataGridView1.Rows.Clear();
+            //dataGridView1.Rows.Clear();
             //_recvBroadcastThread = null;
-            //_recvBroadcastThread = new Thread(receive_broadcast_thread);
-            //_recvBroadcastThread.Start();
+            _recvBroadcastThread = new Thread(receive_broadcast_thread);
+            _recvBroadcastThread.Start();
 
 
-            if (_recvBroadcastThread == null) {
+            /*if (_recvBroadcastThread == null) {
                 _recvBroadcastThread = new Thread(receive_broadcast_thread);
                 _recvBroadcastThread.Start();
-            }
-
-            
+            }*/
 
             _supportDeviceNum = _broadcastObject.supportDeviceNum;
             _broadcastObject.hostIps = new String[_broadcastObject.supportNetInfNum];//for multi interface case
@@ -616,6 +613,7 @@ namespace G_IPCAM
                         Stop_receive_broadcast_thread();
                     }
                     upload_firmware();
+                    //(this.Owner as Form1).Enabled = false; //upgrade Disable disable other function.
                     //MessageBox.Show("Done Fw upgrade");
                 }
             }
