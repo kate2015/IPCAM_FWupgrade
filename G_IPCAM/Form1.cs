@@ -34,6 +34,7 @@ namespace G_IPCAM
         public String[] WebCam;
         public String hostIp;
         string md_name ;
+        
         public dynamic stuff;
         //public byte[] = G_IPCAM.Properties.Resources.;
         public byte[] fwFile;
@@ -41,13 +42,16 @@ namespace G_IPCAM
         private int _broadcastPort = 4950;
         private bool _Stop_scan = false;
         bool _initFlag = false;
+        public bool _modiyip = false;
         public bool[] uploadFwReady;
         public bool[] alreadyUploadFw;
         public bool[] uploadFwStart;
         //private int[] _timeoutCnt;
+        //Modify_ip MForm = new Modify_ip();
 
         Thread _recvBroadcastThread;
         public string dev_fw;
+        internal string _newip =null;
 
         public Form1()
         {
@@ -214,7 +218,7 @@ namespace G_IPCAM
             return stream;
         }
 
-        public void f_sys_xml(Stream S, int devIdx)
+        private void f_sys_xml(Stream S, int devIdx)
         {
 
             XmlTextReader xmlReader = new XmlTextReader(S);
@@ -342,12 +346,15 @@ namespace G_IPCAM
                                             break;
                                         case "Success":
                                             row.Cells[5].Value = "Excute status : Almost Success ...waiting for reboot";
+                                            open_button();
                                             break;
                                         case "fail":
                                             row.Cells[5].Value = "Excute status : Fail";
+                                            open_button();
                                             break;
                                         case "Invalid fw image":
                                             row.Cells[5].Value = "Excute status : Invalid fw image ... Fail";
+                                            open_button();
                                             break;
                                         default:
                                             row.Cells[5].Value = "excute status : Waiting";
@@ -363,6 +370,11 @@ namespace G_IPCAM
             
         }
 
+        public void open_button() {
+            button1.BeginInvoke((MethodInvoker)delegate() { button1.Enabled = true; });
+            button2.BeginInvoke((MethodInvoker)delegate () { button2.Enabled = true; });
+            button3.BeginInvoke((MethodInvoker)delegate () { button3.Enabled = true; });
+        }
         private void broadcast_fun()
         {
             int itfNum = 0;
@@ -489,7 +501,7 @@ namespace G_IPCAM
                     }
                     catch (Exception ex)
                     {
-                        //newsock.Shutdown(newsock);
+                        //newsock.Shutdown(newsock); close socket app crash....
                         //newsock.Close();
                         
                         Console.WriteLine("error:{0}", ex.ToString(), "\n");
@@ -506,12 +518,11 @@ namespace G_IPCAM
 
             }
             /*finally {
-                Thread.ResetAbort();
+                Thread.ResetAbort(); //close socket app crash....
                 
             }*/
-            
+
             Console.WriteLine("broadcaster thread: terminating.");
-            //newsock.Close();
             
         }
 
@@ -531,16 +542,16 @@ namespace G_IPCAM
         public void button1_Click(object sender, EventArgs e)
         {
 
-            //dataGridView1.Rows.Clear();
+            dataGridView1.Rows.Clear();
             //_recvBroadcastThread = null;
-            _recvBroadcastThread = new Thread(receive_broadcast_thread);
-            _recvBroadcastThread.Start();
+            //_recvBroadcastThread = new Thread(receive_broadcast_thread);
+            //_recvBroadcastThread.Start();
 
 
-            /*if (_recvBroadcastThread == null) {
+            if (_recvBroadcastThread == null) {
                 _recvBroadcastThread = new Thread(receive_broadcast_thread);
                 _recvBroadcastThread.Start();
-            }*/
+            }
 
             _supportDeviceNum = _broadcastObject.supportDeviceNum;
             _broadcastObject.hostIps = new String[_broadcastObject.supportNetInfNum];//for multi interface case
@@ -550,39 +561,51 @@ namespace G_IPCAM
 
 
 
-            Try_connect IForm = new Try_connect();
-            IForm.Owner = this;
-            IForm.Show();
+            Try_connect TForm = new Try_connect();
+            TForm.Owner = this;
+            TForm.Show();
             
         }
 
-
+        //private Thread mdip_Thread = null;
         public void button2_Click(object sender, EventArgs e)
         {
             _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
             if (_uf_selectedCellCount > 0)
             {
-                Modify_ip IForm = new Modify_ip();
+                Modify_ip MForm = new Modify_ip();
                 DataGridViewRow row = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex];
 
                 //IForm.String1 = md_name;
                 //IForm.String1 = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells[2].ToString();
-                IForm.String1 = row.Cells[2].Value.ToString();
-                IForm.String2 = row.Cells[1].Value.ToString();  //Need Error handling
-                IForm.SetValue();
-                IForm.Show();
+                MForm.String1 = row.Cells[2].Value.ToString();
+                MForm.String2 = row.Cells[1].Value.ToString();  //Need Error handling
+                MForm.SetValue();
+                MForm.Show();
 
-                
+
+                //this.mdip_Thread = new Thread(new ThreadStart(this.modifyip));
+                //mdip_Thread.Start();
+               
 
             }
             else
             {
                 MessageBox.Show("Please Select IPcamera first, then try again ");
             }
-
-            
         }
+
+        /*private void modifyip() {
+            //while (_newip != null)
+            if( _modiyip)
+            {
+                //dataGridView1.BeginInvoke((MethodInvoker)delegate() { _newip = dataGridView1.Rows.Cells[1].Value.ToString(); });
+                dataGridView1.BeginInvoke((MethodInvoker)delegate() { dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells[2].Value = IForm.newIp; } ); //IForm.newIp
+                _modiyip = false;
+            }
+            
+        }*/
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -592,6 +615,9 @@ namespace G_IPCAM
         public void button3_Click_1(object sender, EventArgs e)
         {
             //String select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
+
+            
+
             _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
             if (_uf_selectedCellCount > 0)
@@ -610,10 +636,11 @@ namespace G_IPCAM
                         //MessageBox.Show(ipaddr[0].ToString());
                         //MessageBox.Show(ipaddr[1].ToString());
                         Open_Firmware_file();
-                        Stop_receive_broadcast_thread();
+                        //Stop_receive_broadcast_thread();
                     }
                     upload_firmware();
-                    //(this.Owner as Form1).Enabled = false; //upgrade Disable disable other function.
+
+                    
                     //MessageBox.Show("Done Fw upgrade");
                 }
             }
@@ -639,20 +666,7 @@ namespace G_IPCAM
                 {
                     byte[] filebytes = File.ReadAllBytes(filename);
 
-
                     fwFile = filebytes;
-                    //textBox_filepath.Text = file;
-                    //fwFile = System.Text.Encoding.Default.GetBytes(file);
-
-                    /*
-                    
-                    byte[] bytes = new byte[text.Length * sizeof(char)];
-                    System.Buffer.BlockCopy(text.ToCharArray(), 0, bytes, 0, bytes.Length);
-                    fwFile = bytes;*/
-
-                    //fwFile = System.Text.ASCIIEncoding.Default.GetBytes(file);
-                    //fwFile = EncodeToBytes(text);
-
 
                 }
                 catch (Win32Exception ex)
@@ -670,11 +684,15 @@ namespace G_IPCAM
             string responsData;
             String select_index;
             String _fwUpgradeUri;
-            string ipaddr;
+            string ipaddress;
             _initFlag = true;
 
+            this.button1.Enabled = false; //upgrade Disable disable other function.
+            this.button2.Enabled = false;
+            this.button3.Enabled = false;
+
             DataGridViewRow row = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex];
-            ipaddr = row.Cells[1].Value.ToString();
+            ipaddress = row.Cells[1].Value.ToString();
 
 
             //must check fw version of FwUpgrade0.write_log. at FwUpgrade.cs, keyword: "_updateToFwVer"
@@ -690,7 +708,7 @@ namespace G_IPCAM
                     if ( ipaddr != null)
                     {
                         //_fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddr[i]);
-                        _fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddr);
+                        _fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddress);
                         //uploadFwStart[i] = true;
                         for (j = 0; j < retryNum; j++)
                         {

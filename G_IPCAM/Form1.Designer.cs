@@ -218,13 +218,13 @@
         public System.Windows.Forms.Button button3;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn No;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
+        public System.Windows.Forms.DataGridView dataGridView1;
+        public System.Windows.Forms.DataGridViewTextBoxColumn No;
+        public System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+        public System.Windows.Forms.DataGridViewTextBoxColumn Column4;
+        public System.Windows.Forms.DataGridViewTextBoxColumn Column2;
+        public System.Windows.Forms.DataGridViewTextBoxColumn Column3;
+        public System.Windows.Forms.DataGridViewTextBoxColumn Column5;
     }
 }
 

@@ -30,7 +30,8 @@ namespace G_IPCAM
 
             this.progressBar1.Style = ProgressBarStyle.Marquee;
             this.progressBar1.MarqueeAnimationSpeed = 100;
-            (this.Owner as Form1).Enabled = false;
+
+            (this.Owner as Form1).Enabled = false; //Disable Form1 button.
         }
 
         private void Try_connect_FormClosing(object sender, FormClosingEventArgs e)

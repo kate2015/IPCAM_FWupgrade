@@ -34,12 +34,7 @@ namespace G_IPCAM
 
         private void Try_bar_close() {
             Thread.Sleep(5000);
-
-           
-
-            //string a = IForm.GetValue();
-
-
+            
             this.Invoke((MethodInvoker)delegate
             {
                 // close the form on the forms thread

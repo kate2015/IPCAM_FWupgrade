@@ -17,6 +17,8 @@ namespace G_IPCAM
         private string string1;
         private string Ip;
         public string Ipaddress, newIp;
+        Form1 IForm = new Form1();
+
 
         public Modify_ip()
         {
@@ -62,11 +64,11 @@ namespace G_IPCAM
             
             Ipaddress = Ip;
             newIp = this.tb_ipaddress.Text;
-            HttpWebResponse HWResp;
             string dlc_content = "<?xml version =\"1.0\" encoding=\"utf-8\"?><network><Ipv4Address>" + newIp + "</Ipv4Address></network>";
             //string post_data = "content=" + Uri.EscapeDataString(dlc_content);
             string url = "http://" + Ipaddress + "/cgi-bin/network.cgi";
-
+            HttpWebResponse HWResp;
+            
 
             try
             {
@@ -77,11 +79,16 @@ namespace G_IPCAM
                 MessageBox.Show("error" + ex.ToString());
             }
 
+            //IForm.BeginInvoke((MethodInvoker) delegate() { IForm._newip = newIp; });
+            IForm._newip = newIp;
+
+            //IForm.BeginInvoke((MethodInvoker)delegate() { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
+            
             this.Close();
             //Environment.Exit(Environment.ExitCode); //close form.
 
-            Try_bar IForm = new Try_bar();
-            IForm.Show();
+            Try_bar TryForm = new Try_bar();
+            TryForm.Show();
         }
 
         private void button_cancel_Click(object sender, EventArgs e)
