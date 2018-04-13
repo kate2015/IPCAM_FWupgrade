@@ -734,6 +734,9 @@ namespace G_IPCAM
             Console.WriteLine("UploadFirmware thread: terminating.");
         }
 
-        
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            System.Environment.Exit(-12);
+        }
     }
 }
