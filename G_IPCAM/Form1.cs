@@ -477,7 +477,7 @@ namespace G_IPCAM
                             }
                         }
 
-                        for (i = 0; i < supportDeviceNum; i++)
+                        for (i = 0 ; i < supportDeviceNum ; i++)
                         {
                             if (mac[i] == null)
                             {
@@ -492,6 +492,7 @@ namespace G_IPCAM
 
                                     //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, (String)stuff.ip); });
                                     dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, ipaddr[i]); });
+                                    Thread.Sleep(50); //sometimes will show 2
 
                                     deviceNum++;
                                 }
@@ -512,10 +513,8 @@ namespace G_IPCAM
             }
             catch (ThreadAbortException exception)
             {
-                
                 Console.WriteLine("Exception message:{0}", exception.Message);
-                
-
+                Thread.ResetAbort();
             }
             /*finally {
                 Thread.ResetAbort(); //close socket app crash....
