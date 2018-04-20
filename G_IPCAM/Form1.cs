@@ -175,7 +175,7 @@ namespace G_IPCAM
                 NetworkCredential nc = new NetworkCredential(login, passwd);
                 request.Credentials = nc;
                 request.Method = "GET";
-                request.Timeout = 12000;    // time out value = 1 s.
+                request.Timeout = 180000;    // time out value = 1 s.
                 request.KeepAlive = false;
                 request.Proxy = null;
                 response = (HttpWebResponse)request.GetResponse();
