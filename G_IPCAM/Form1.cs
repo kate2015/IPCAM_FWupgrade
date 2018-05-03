@@ -61,7 +61,6 @@ namespace G_IPCAM
             timer.Interval = 1000;
             timer.Enabled = true;
             timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);
-
             
         }
 
@@ -74,7 +73,6 @@ namespace G_IPCAM
         public void httprequest_timer(object sender, System.Timers.ElapsedEventArgs e)
         {
             camera_info();
-            
         }
 
         void camera_info()
@@ -263,7 +261,7 @@ namespace G_IPCAM
                                     }
                                     //md_name = dataGridView1.Rows[devIdx].Cells[1] ;
                                     //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows[devIdx].Cells[1], (string) md_name; });
-                                    row.Cells[2].Value = md_name;
+                                    row.Cells[3].Value = md_name;
                                     
                                 }
                                 break;
@@ -294,7 +292,7 @@ namespace G_IPCAM
                             case "MacAddress":
                                 xmlReader.Read();
                                 //this.textBox_macaddress.Nam = xmlReader.Value;
-                                row.Cells[3].Value = xmlReader.Value;
+                                //row.Cells[3].Value = xmlReader.Value;
                                 break;
                             case "Token":
                                 xmlReader.Read();
@@ -429,17 +427,10 @@ namespace G_IPCAM
                 mac[i] = null;
                 WebCam[i] = null;
             }
-
-
             
             IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _broadcastPort);
-
             Socket newsock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-
             newsock.Bind(ipep);
-
-
 
             IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
             EndPoint Remote = (EndPoint)(sender);
@@ -491,7 +482,9 @@ namespace G_IPCAM
                                     Console.WriteLine("nitaa{0} ipaddr = {1}", i, (String)stuff.ip);
 
                                     //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, (String)stuff.ip); });
-                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, ipaddr[i]); });
+                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, ipaddr[i], mac[i]); });
+                                    
+
                                     Thread.Sleep(50); //sometimes will show 2
 
                                     deviceNum++;
@@ -516,10 +509,6 @@ namespace G_IPCAM
                 Console.WriteLine("Exception message:{0}", exception.Message);
                 Thread.ResetAbort();
             }
-            /*finally {
-                Thread.ResetAbort(); //close socket app crash....
-                
-            }*/
 
             Console.WriteLine("broadcaster thread: terminating.");
             

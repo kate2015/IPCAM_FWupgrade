@@ -37,13 +37,13 @@
             this.button3 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.label3 = new System.Windows.Forms.Label();
             this.No = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label3 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -129,8 +129,8 @@
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.No,
             this.Column1,
-            this.Column4,
             this.Column2,
+            this.Column4,
             this.Column3,
             this.Column5});
             this.dataGridView1.Location = new System.Drawing.Point(33, 21);
@@ -140,6 +140,17 @@
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView1.Size = new System.Drawing.Size(760, 235);
             this.dataGridView1.TabIndex = 3;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            this.label3.Location = new System.Drawing.Point(16, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(84, 15);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "IP Camera List";
             // 
             // No
             // 
@@ -152,16 +163,16 @@
             this.Column1.HeaderText = "IP.";
             this.Column1.Name = "Column1";
             // 
-            // Column4
-            // 
-            this.Column4.HeaderText = "Model Name";
-            this.Column4.Name = "Column4";
-            // 
             // Column2
             // 
             this.Column2.HeaderText = "Mac";
             this.Column2.Name = "Column2";
             this.Column2.Width = 150;
+            // 
+            // Column4
+            // 
+            this.Column4.HeaderText = "Model Name";
+            this.Column4.Name = "Column4";
             // 
             // Column3
             // 
@@ -173,17 +184,6 @@
             this.Column5.HeaderText = "Excute Status";
             this.Column5.Name = "Column5";
             this.Column5.Width = 250;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
-            this.label3.Location = new System.Drawing.Point(16, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(84, 15);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "IP Camera List";
             // 
             // Form1
             // 
@@ -219,13 +219,13 @@
         public System.Windows.Forms.Button button3;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label3;
-        public System.Windows.Forms.DataGridViewTextBoxColumn No;
-        public System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-        public System.Windows.Forms.DataGridViewTextBoxColumn Column4;
-        public System.Windows.Forms.DataGridViewTextBoxColumn Column2;
-        public System.Windows.Forms.DataGridViewTextBoxColumn Column3;
-        public System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn No;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
     }
 }
 
