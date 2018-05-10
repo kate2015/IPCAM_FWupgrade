@@ -31,6 +31,8 @@ namespace G_IPCAM
         public Int32 _uf_selectedCellCount;
         public String[] ipaddr;
         public String[] mac;
+        public String[] fwVersion;
+        public String[] skuName;
         public String[] WebCam;
         public String hostIp;
         string md_name ;
@@ -57,10 +59,10 @@ namespace G_IPCAM
         {
             InitializeComponent();
 
-            System.Timers.Timer timer = new System.Timers.Timer();
+            /*System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 1000;
             timer.Enabled = true;
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);*/
             
         }
 
@@ -419,12 +421,18 @@ namespace G_IPCAM
 
             ipaddr = new String[supportDeviceNum];
             mac = new String[supportDeviceNum];
+            fwVersion = new String[supportDeviceNum];
+            skuName = new String[supportDeviceNum];
             WebCam = new String[supportDeviceNum];
 
             for (i = 0; i < supportDeviceNum; i++)
             {
                 ipaddr[i] = null;
                 mac[i] = null;
+
+                fwVersion[i] = null;
+                skuName[i] = null;
+
                 WebCam[i] = null;
             }
             
@@ -440,7 +448,7 @@ namespace G_IPCAM
             {
                 while (!_Stop_scan)
                 {
-                    byte[] data = new byte[1024];
+                    byte[] data = new byte[2048];
                     try
                     {
                         int recv = newsock.ReceiveFrom(data, ref Remote);
@@ -478,16 +486,21 @@ namespace G_IPCAM
                                         break;
                                     mac[i] = (String)stuff.mac;
                                     ipaddr[i] = (String)stuff.ip;
+                                    fwVersion[i] = (String)stuff.fwVersion;
+                                    skuName[i] = (String)stuff.skuName;
+
                                     Console.WriteLine("mac = {0}", (String)stuff.mac);
                                     Console.WriteLine("nitaa{0} ipaddr = {1}", i, (String)stuff.ip);
+                                    Console.WriteLine("nitaa{0} fwVersion = {1}", i, (String)stuff.fwVersion);
+                                    Console.WriteLine("nitaa{0} skuName = {1}", i, (String)stuff.skuName);
 
                                     //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, (String)stuff.ip); });
-                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, ipaddr[i], mac[i]); });
+                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, ipaddr[i], mac[i], skuName[i], fwVersion[i]); });
                                     
 
                                     Thread.Sleep(50); //sometimes will show 2
 
-                                    deviceNum++;
+                                    deviceNum++; 
                                 }
                                 break;
                             }

@@ -38,7 +38,10 @@ namespace G_IPCAM
         {
             Form1 IForm = new Form1();
 
+
+            //Close receive_broadcast thread while close Tryconnect button....
             _form1.Stop_receive_broadcast_thread();
+
             (this.Owner as Form1).Enabled = true;
 
         }
