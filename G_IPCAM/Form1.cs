@@ -327,29 +327,29 @@ namespace G_IPCAM
                                     switch (xmlReader.Value)
                                     {
                                         case "Not upload Firmware":
-                                            row.Cells[5].Value = "Excute status : OK"; //fwUpgradeStatusStr = "wait";
+                                            row.Cells[5].Value = "Execute status : OK"; //fwUpgradeStatusStr = "wait";
                                             break;
                                         case "Burn Bootloader":
-                                            row.Cells[5].Value = "Excute status : 15%...burning";//fwUpgradeStatusStr = "45%";
+                                            row.Cells[5].Value = "Execute status : 15%...burning";//fwUpgradeStatusStr = "45%";
                                             break;
                                         case "Burn Kernel":
-                                            row.Cells[5].Value = "Excute status : 20%...burning";//fwUpgradeStatusStr = "60%";
+                                            row.Cells[5].Value = "Execute status : 20%...burning";//fwUpgradeStatusStr = "60%";
                                             break;
                                         case "Burn RootFs":
-                                            row.Cells[5].Value = "Excute status : 30%...burning";//fwUpgradeStatusStr = "70%";
+                                            row.Cells[5].Value = "Execute status : 30%...burning";//fwUpgradeStatusStr = "70%";
                                             break;
                                         case "Burn App":
-                                            row.Cells[5].Value = "Excute status : 85%...burning";//fwUpgradeStatusStr = "75%";
+                                            row.Cells[5].Value = "Execute status : 85%...burning";//fwUpgradeStatusStr = "75%";
                                             break;
                                         case "Burn Config":
-                                            row.Cells[5].Value = "Excute status : 99%";//fwUpgradeStatusStr = "99%";
+                                            row.Cells[5].Value = "Execute status : 99%";//fwUpgradeStatusStr = "99%";
                                             break;
                                         case "Success":
-                                            row.Cells[5].Value = "Excute status : Almost Success ...waiting for reboot";
+                                            row.Cells[5].Value = "Execute status : Almost Success ...waiting for reboot";
                                             open_button();
                                             break;
                                         case "fail":
-                                            row.Cells[5].Value = "Excute status : Fail";
+                                            row.Cells[5].Value = "Execute status : Fail";
                                             open_button();
                                             break;
                                         case "Invalid fw image":
@@ -476,7 +476,7 @@ namespace G_IPCAM
                             }
                         }
 
-                        for (i = 0 ; i < supportDeviceNum ; i++)
+                        for (i = 1 ; i < supportDeviceNum ; i++)
                         {
                             if (mac[i] == null)
                             {

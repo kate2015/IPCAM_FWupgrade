@@ -75,12 +75,12 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(16, 18);
+            this.label1.Location = new System.Drawing.Point(6, 18);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(803, 18);
+            this.label1.Size = new System.Drawing.Size(806, 18);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Please Click     [Search IPcam] For searching camera     [Modify IP] For change i" +
-    "p address     [Ipdate Firmware] For upgrade firmware";
+            this.label1.Text = "Please Click  [Search IP Camera] For searching camera  [Modify IP] For change IP " +
+    "address  [Update Firmware] For upgrade firmware";
             // 
             // button1
             // 
@@ -181,7 +181,7 @@
             // 
             // Column5
             // 
-            this.Column5.HeaderText = "Excute Status";
+            this.Column5.HeaderText = "Execute Status";
             this.Column5.Name = "Column5";
             this.Column5.Width = 250;
             // 
