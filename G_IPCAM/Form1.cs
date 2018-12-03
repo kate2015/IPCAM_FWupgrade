@@ -129,7 +129,7 @@ namespace G_IPCAM
                 request.Credentials = nc;
                 request.ContentType = "application/binary";
                 request.ContentLength = data.Length;
-                request.Timeout = 180000;
+                request.Timeout = 120000;
                 request.ContentLength = data.Length;
                 request.Proxy = null;
                 request.PreAuthenticate = true;
@@ -617,8 +617,7 @@ namespace G_IPCAM
         {
             //String select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
 
-            
-
+ 
             _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
 
             if (_uf_selectedCellCount > 0)
@@ -638,10 +637,10 @@ namespace G_IPCAM
                         //MessageBox.Show(ipaddr[1].ToString());
                         Open_Firmware_file();
                         //Stop_receive_broadcast_thread();
+                        
                     }
-                    upload_firmware();
-
                     
+
                     //MessageBox.Show("Done Fw upgrade");
                 }
             }
@@ -669,12 +668,14 @@ namespace G_IPCAM
 
                     fwFile = filebytes;
 
+                    upload_firmware();
                 }
                 catch (Win32Exception ex)
                 {
                     MessageBox.Show("error" + ex.Message);
                 }
             }
+
         }
 
         public void upload_firmware()

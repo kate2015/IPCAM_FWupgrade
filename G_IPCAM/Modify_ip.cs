@@ -19,7 +19,6 @@ namespace G_IPCAM
         public string Ipaddress, newIp;
         Form1 IForm = new Form1();
 
-
         public Modify_ip()
         {
             InitializeComponent();
@@ -67,9 +66,10 @@ namespace G_IPCAM
             string dlc_content = "<?xml version =\"1.0\" encoding=\"utf-8\"?><network><Ipv4Address>" + newIp + "</Ipv4Address></network>";
             //string post_data = "content=" + Uri.EscapeDataString(dlc_content);
             string url = "http://" + Ipaddress + "/cgi-bin/network.cgi";
+
+            //DataGridViewRow row = IForm.dataGridView1.Rows[];
             HttpWebResponse HWResp;
             
-
             try
             {
                 HWResp = PosthttpRequest(dlc_content, url);
@@ -79,16 +79,18 @@ namespace G_IPCAM
                 MessageBox.Show("error" + ex.ToString());
             }
 
-            //IForm.BeginInvoke((MethodInvoker) delegate() { IForm._newip = newIp; });
             IForm._newip = newIp;
-
-            //IForm.BeginInvoke((MethodInvoker)delegate() { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
             
             this.Close();
             //Environment.Exit(Environment.ExitCode); //close form.
 
             Try_bar TryForm = new Try_bar();
             TryForm.Show();
+
+
+            //IForm.BeginInvoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
+            IForm.Invoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
+            //IForm.BeginInvoke((MethodInvoker)delegate () { IForm._newip = newIp; });
         }
 
         private void button_cancel_Click(object sender, EventArgs e)
