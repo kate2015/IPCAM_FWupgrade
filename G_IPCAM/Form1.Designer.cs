@@ -135,6 +135,7 @@
             this.Column5});
             this.dataGridView1.Location = new System.Drawing.Point(33, 21);
             this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersWidth = 10;
             this.dataGridView1.RowTemplate.Height = 28;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -145,33 +146,39 @@
             // 
             this.No.HeaderText = "No.";
             this.No.Name = "No";
+            this.No.ReadOnly = true;
             this.No.Width = 50;
             // 
             // Column1
             // 
             this.Column1.HeaderText = "IP.";
             this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
             // 
             // Column2
             // 
             this.Column2.HeaderText = "Mac";
             this.Column2.Name = "Column2";
+            this.Column2.ReadOnly = true;
             this.Column2.Width = 150;
             // 
             // Column4
             // 
             this.Column4.HeaderText = "Model Name";
             this.Column4.Name = "Column4";
+            this.Column4.ReadOnly = true;
             // 
             // Column3
             // 
             this.Column3.HeaderText = "Firmware Version";
             this.Column3.Name = "Column3";
+            this.Column3.ReadOnly = true;
             // 
             // Column5
             // 
             this.Column5.HeaderText = "Execute Status";
             this.Column5.Name = "Column5";
+            this.Column5.ReadOnly = true;
             this.Column5.Width = 250;
             // 
             // label3
