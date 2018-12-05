@@ -16,7 +16,7 @@ namespace G_IPCAM
     public partial class Try_connect : Form
     {
         public Form1 _form1 = new Form1();
-        
+        bool form = true;
 
         public Try_connect()
         {
@@ -43,12 +43,16 @@ namespace G_IPCAM
 
             Form1 IForm = new Form1();
             //GIC-749 close form in 60sec
-            Thread.Sleep(5000);
-            this.Invoke((MethodInvoker)delegate
-            {
-                _form1.Stop_receive_broadcast_thread();
-                this.Close();
-            });
+            Thread.Sleep(15000);
+
+            if (form == true) {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    this.Close();
+                    
+                });
+            }
+
         }
 
         private void Try_connect_FormClosing(object sender, FormClosingEventArgs e)
@@ -59,7 +63,7 @@ namespace G_IPCAM
             _form1.Stop_receive_broadcast_thread();
 
             (this.Owner as Form1).Enabled = true;
-
+            form = false;
         }
 
     }
