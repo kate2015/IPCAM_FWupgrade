@@ -89,7 +89,7 @@ namespace G_IPCAM
 
 
             //IForm.BeginInvoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
-            IForm.Invoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
+            //IForm.Invoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
             //IForm.BeginInvoke((MethodInvoker)delegate () { IForm._newip = newIp; });
         }
 

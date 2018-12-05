@@ -72,7 +72,7 @@
             this.tb_model.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tb_model.Location = new System.Drawing.Point(136, 33);
             this.tb_model.Name = "tb_model";
-            this.tb_model.Size = new System.Drawing.Size(90, 19);
+            this.tb_model.Size = new System.Drawing.Size(135, 19);
             this.tb_model.TabIndex = 3;
             // 
             // tb_ipaddress

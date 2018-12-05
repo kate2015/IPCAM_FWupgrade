@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -23,20 +24,35 @@ namespace G_IPCAM
             
         }
 
+       
         private void Try_connect_Load(object sender, EventArgs e)
         {
-
             Application.EnableVisualStyles();
 
             this.progressBar1.Style = ProgressBarStyle.Marquee;
             this.progressBar1.MarqueeAnimationSpeed = 100;
 
             (this.Owner as Form1).Enabled = false; //Disable Form1 button.
+
+            Thread closeformtimer = new Thread(new ThreadStart(CloseAfter5Sce));
+            closeformtimer.Start();
+        }
+
+        private void CloseAfter5Sce()
+        {
+
+            Form1 IForm = new Form1();
+            //GIC-749 close form in 60sec
+            Thread.Sleep(5000);
+            this.Invoke((MethodInvoker)delegate
+            {
+                _form1.Stop_receive_broadcast_thread();
+                this.Close();
+            });
         }
 
         private void Try_connect_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Form1 IForm = new Form1();
 
 
             //Close receive_broadcast thread while close Tryconnect button....
@@ -45,5 +61,6 @@ namespace G_IPCAM
             (this.Owner as Form1).Enabled = true;
 
         }
+
     }
 }

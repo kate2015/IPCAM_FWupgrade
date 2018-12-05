@@ -85,20 +85,21 @@ namespace G_IPCAM
             HttpWebResponse netResp;
             Stream sys_stream;
 
-            for (int i = 0; i < _supportDeviceNum; i++)
+            
+            for (int i = 1; i < _supportDeviceNum; i++)
             {
-                if (ipaddr[i] != null  ) // &&_alreadyDecideUpgradeStatus[i] == false
+                if (ipaddr[i] != null)
                 {
                     getFwInfoUri[i] = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?GetUpgradeStatus", ipaddr[i]);
-                    getSysInfoUri[i] = string.Format("http://{0}/cgi-bin/system.cgi",ipaddr[i]);
+                    getSysInfoUri[i] = string.Format("http://{0}/cgi-bin/system.cgi", ipaddr[i]);
 
-                    netResp = GethttpRequest(getSysInfoUri[i]);
+                    /*netResp = GethttpRequest(getSysInfoUri[i]);
                     if (null != netResp)
                     {
                         HWresp_st = create_stream(netResp);
                         sys_stream = GenerateStreamFromString(HWresp_st);
                         f_sys_xml(sys_stream, i);
-                    }
+                    }*/
 
                     netResp = GethttpRequest(getFwInfoUri[i]);
                     if (null != netResp)
@@ -110,6 +111,8 @@ namespace G_IPCAM
 
                 }
             }
+            
+            
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -407,7 +410,7 @@ namespace G_IPCAM
                 }
             }
             Console.WriteLine("itfNum = {0}", itfNum);
-            for (int i = 0; i < _broadTimes; i++)
+            for (int i = 1; i < _broadTimes; i++)
                 _broadcastObject.broadcast_getacipc();
             return;
         }
@@ -438,7 +441,18 @@ namespace G_IPCAM
             
             IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _broadcastPort);
             Socket newsock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            newsock.Bind(ipep);
+
+            //for Run duplicate issue
+            try
+            {
+                newsock.Bind(ipep);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error:{0}", ex.ToString(), "\n");
+                System.Environment.Exit(-13);
+            }
+            //newsock.Bind(ipep);
 
             IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
             EndPoint Remote = (EndPoint)(sender);
@@ -476,26 +490,26 @@ namespace G_IPCAM
                             }
                         }
 
-                        for (i = 1 ; i < supportDeviceNum ; i++)
+                        for (i = 0 ; i < supportDeviceNum ; i++)
                         {
-                            if (mac[i] == null)
+                            if (mac[i+1] == null)
                             {
                                 if (findSameMac == false)
                                 {
                                     if (stuff.mac == null || stuff.ip == null)
                                         break;
-                                    mac[i] = (String)stuff.mac;
-                                    ipaddr[i] = (String)stuff.ip;
-                                    fwVersion[i] = (String)stuff.fwVersion;
-                                    skuName[i] = (String)stuff.skuName;
+                                    mac[i + 1] = (String)stuff.mac;
+                                    ipaddr[i + 1] = (String)stuff.ip;
+                                    fwVersion[i + 1] = (String)stuff.fwVersion;
+                                    skuName[i + 1] = (String)stuff.skuName;
 
                                     Console.WriteLine("mac = {0}", (String)stuff.mac);
-                                    Console.WriteLine("nitaa{0} ipaddr = {1}", i, (String)stuff.ip);
-                                    Console.WriteLine("nitaa{0} fwVersion = {1}", i, (String)stuff.fwVersion);
-                                    Console.WriteLine("nitaa{0} skuName = {1}", i, (String)stuff.skuName);
+                                    Console.WriteLine("nitaa{0} ipaddr = {1}", i + 1, (String)stuff.ip);
+                                    Console.WriteLine("nitaa{0} fwVersion = {1}", i + 1, (String)stuff.fwVersion);
+                                    Console.WriteLine("nitaa{0} skuName = {1}", i + 1, (String)stuff.skuName);
 
                                     //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, (String)stuff.ip); });
-                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, ipaddr[i], mac[i], skuName[i], fwVersion[i]); });
+                                    dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i + 1, ipaddr[i + 1], mac[i + 1], skuName[i + 1], fwVersion[i + 1]); });
                                     
 
                                     Thread.Sleep(50); //sometimes will show 2
@@ -542,8 +556,9 @@ namespace G_IPCAM
 
         public void button1_Click(object sender, EventArgs e)
         {
-
+            dataGridView1.DataSource = null;
             dataGridView1.Rows.Clear();
+
             //_recvBroadcastThread = null;
             //_recvBroadcastThread = new Thread(receive_broadcast_thread);
             //_recvBroadcastThread.Start();
@@ -580,15 +595,15 @@ namespace G_IPCAM
 
                 //IForm.String1 = md_name;
                 //IForm.String1 = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells[2].ToString();
+
+                //TODO: Need Error handling
                 MForm.String1 = row.Cells[2].Value.ToString();
-                MForm.String2 = row.Cells[1].Value.ToString();  //Need Error handling
+                MForm.String2 = row.Cells[1].Value.ToString();  
                 MForm.SetValue();
                 MForm.Show();
 
-
                 //this.mdip_Thread = new Thread(new ThreadStart(this.modifyip));
                 //mdip_Thread.Start();
-               
 
             }
             else
@@ -639,8 +654,6 @@ namespace G_IPCAM
                         //Stop_receive_broadcast_thread();
                         
                     }
-                    
-
                     //MessageBox.Show("Done Fw upgrade");
                 }
             }
