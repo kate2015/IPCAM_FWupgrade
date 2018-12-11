@@ -59,10 +59,10 @@ namespace G_IPCAM
         {
             InitializeComponent();
 
-            /*System.Timers.Timer timer = new System.Timers.Timer();
+            System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 1000;
             timer.Enabled = true;
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);*/
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(httprequest_timer);
             
         }
 
@@ -86,22 +86,23 @@ namespace G_IPCAM
             Stream sys_stream;
 
             
-            for (int i = 1; i < _supportDeviceNum; i++)
+            for (int i = 0; i < _supportDeviceNum; i++)
             {
                 if (ipaddr[i] != null)
                 {
-                    getFwInfoUri[i] = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?GetUpgradeStatus", ipaddr[i]);
+                    
                     getSysInfoUri[i] = string.Format("http://{0}/cgi-bin/system.cgi", ipaddr[i]);
+                    getFwInfoUri[i] = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?GetUpgradeStatus", ipaddr[i]);
 
-                    /*netResp = GethttpRequest(getSysInfoUri[i]);
+                    netResp = GethttpRequest(getSysInfoUri[i ]);
                     if (null != netResp)
                     {
                         HWresp_st = create_stream(netResp);
                         sys_stream = GenerateStreamFromString(HWresp_st);
                         f_sys_xml(sys_stream, i);
-                    }*/
+                    }
 
-                    netResp = GethttpRequest(getFwInfoUri[i]);
+                    netResp = GethttpRequest(getFwInfoUri[i ]);
                     if (null != netResp)
                     {
                         HWresp_st = create_stream(netResp);
@@ -227,7 +228,7 @@ namespace G_IPCAM
             XmlTextReader xmlReader = new XmlTextReader(S);
             Modify_ip IForm = new Modify_ip();
             IForm.Owner = this;
-            DataGridViewRow row = dataGridView1.Rows[devIdx];
+            DataGridViewRow row = dataGridView1.Rows[devIdx -1];
 
             while (xmlReader.Read())
             {
@@ -266,7 +267,7 @@ namespace G_IPCAM
                                     }
                                     //md_name = dataGridView1.Rows[devIdx].Cells[1] ;
                                     //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows[devIdx].Cells[1], (string) md_name; });
-                                    row.Cells[3].Value = md_name;
+                                    //row.Cells[3].Value = md_name;
                                     
                                 }
                                 break;
@@ -311,7 +312,7 @@ namespace G_IPCAM
 
         public void parser_fw_upgrade_xml(Stream S, int devIdx)
         {
-            DataGridViewRow row = dataGridView1.Rows[devIdx];
+            DataGridViewRow row = dataGridView1.Rows[devIdx -1];
             XmlTextReader xmlReader = new XmlTextReader(S);
                 
 
@@ -699,11 +700,11 @@ namespace G_IPCAM
             this.button3.Enabled = false;
 
             DataGridViewRow row = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex];
-            
-            for (i = 0; i < _uf_selectedCellCount; i++)
+
+            int select_count = dataGridView1.SelectedRows.Count;
+            for (i = 0; i < select_count; i++)
             {
                 ipaddress = dataGridView1.SelectedRows[i].Cells[1].Value.ToString();
-
 
                 if ( ipaddr != null)
                     {
