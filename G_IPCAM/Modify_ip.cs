@@ -17,11 +17,11 @@ namespace G_IPCAM
         private string string1;
         private string Ip;
         public string Ipaddress, newIp;
-        Form1 IForm = new Form1();
 
         public Modify_ip()
         {
             InitializeComponent();
+
         }
 
         public string String1
@@ -58,7 +58,7 @@ namespace G_IPCAM
             return newIp;
         }
 
-        private void button_accept_Click(object sender, EventArgs e)
+        public void button_accept_Click(object sender, EventArgs e)
         {
             
             Ipaddress = Ip;
@@ -66,10 +66,13 @@ namespace G_IPCAM
             string dlc_content = "<?xml version =\"1.0\" encoding=\"utf-8\"?><network><Ipv4Address>" + newIp + "</Ipv4Address></network>";
             //string post_data = "content=" + Uri.EscapeDataString(dlc_content);
             string url = "http://" + Ipaddress + "/cgi-bin/network.cgi";
-
-            //DataGridViewRow row = IForm.dataGridView1.Rows[];
+            //Form1 IForm = new Form1();
+            //DataGridViewRow row = IForm.dataGridView1.Rows;
+            //DataGridViewRow row = IForm.Invoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex]; });
             HttpWebResponse HWResp;
+
             
+
             try
             {
                 HWResp = PosthttpRequest(dlc_content, url);
@@ -79,8 +82,19 @@ namespace G_IPCAM
                 MessageBox.Show("error" + ex.ToString());
             }
 
-            IForm._newip = newIp;
+            //IForm._newip = newIp;
+            this.Ip = String1;
+            //IForm.dataGridView1.Rows[DataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp;
+            //dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex + 1].Value.ToString();
+
             
+            /*
+            IForm.dataGridView1.Invoke((MethodInvoker)delegate 
+            {
+                //IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp;
+                IForm.dataGridView1.SelectedRows[0].Cells[1].Value = newIp;
+            });*/
+
             this.Close();
             //Environment.Exit(Environment.ExitCode); //close form.
 
@@ -88,6 +102,7 @@ namespace G_IPCAM
             TryForm.Show();
 
 
+            
             //IForm.BeginInvoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
             //IForm.Invoke((MethodInvoker)delegate () { IForm.dataGridView1.Rows[IForm.dataGridView1.CurrentCell.RowIndex].Cells[2].Value = newIp; });
             //IForm.BeginInvoke((MethodInvoker)delegate () { IForm._newip = newIp; });

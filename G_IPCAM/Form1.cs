@@ -53,7 +53,7 @@ namespace G_IPCAM
 
         Thread _recvBroadcastThread;
         public string dev_fw;
-        internal string _newip =null;
+        internal string _newip = null;
 
         public Form1()
         {
@@ -559,11 +559,6 @@ namespace G_IPCAM
             dataGridView1.DataSource = null;
             dataGridView1.Rows.Clear();
 
-            //_recvBroadcastThread = null;
-            //_recvBroadcastThread = new Thread(receive_broadcast_thread);
-            //_recvBroadcastThread.Start();
-
-
             if (_recvBroadcastThread == null) {
                 _recvBroadcastThread = new Thread(receive_broadcast_thread);
                 _recvBroadcastThread.Start();
@@ -586,7 +581,8 @@ namespace G_IPCAM
         //private Thread mdip_Thread = null;
         public void button2_Click(object sender, EventArgs e)
         {
-            _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
+            //_uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
+            _uf_selectedCellCount = (dataGridView1.Rows.Count -1);
 
             if (_uf_selectedCellCount > 0)
             {
@@ -632,8 +628,7 @@ namespace G_IPCAM
         {
             //String select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
 
- 
-            _uf_selectedCellCount = dataGridView1.GetCellCount(DataGridViewElementStates.Selected);
+            _uf_selectedCellCount = (dataGridView1.Rows.Count - 1);
 
             if (_uf_selectedCellCount > 0)
             {
@@ -647,9 +642,7 @@ namespace G_IPCAM
                     DialogResult r = MessageBox.Show("Press OK to choose update firware file", "Update Firmware Dialog", MessageBoxButtons.OK);
                     if (r == DialogResult.OK)
                     {
-                        // Close the receive_broadcast_thread.
-                        //MessageBox.Show(ipaddr[0].ToString());
-                        //MessageBox.Show(ipaddr[1].ToString());
+                        // Start Update FW
                         Open_Firmware_file();
                         //Stop_receive_broadcast_thread();
                         
@@ -697,7 +690,6 @@ namespace G_IPCAM
             int j = 0;
             int retryNum = 2;
             string responsData;
-            String select_index;
             String _fwUpgradeUri;
             string ipaddress;
             _initFlag = true;
@@ -707,24 +699,16 @@ namespace G_IPCAM
             this.button3.Enabled = false;
 
             DataGridViewRow row = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex];
-            ipaddress = row.Cells[1].Value.ToString();
+            
+            for (i = 0; i < _uf_selectedCellCount; i++)
+            {
+                ipaddress = dataGridView1.SelectedRows[i].Cells[1].Value.ToString();
 
 
-            //must check fw version of FwUpgrade0.write_log. at FwUpgrade.cs, keyword: "_updateToFwVer"
-            //while (_initFlag) //!_shouldStop && 
-            //{
-            //for (i = 0; i < _uf_selectedCellCount; i++)
-            //{
-            select_index = dataGridView1.SelectedCells[i].RowIndex.ToString();
-                    //MessageBox.Show(select_index, "Selected Cells");
-
-                    //if (alreadyUploadFw[i] == false && ipaddr[i] != null && uploadFwReady[i] == true)
-                    //if ( ipaddr[i] != null)
-                    if ( ipaddr != null)
+                if ( ipaddr != null)
                     {
-                        //_fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddr[i]);
+                        
                         _fwUpgradeUri = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?isBinary=true", ipaddress);
-                        //uploadFwStart[i] = true;
                         for (j = 0; j < retryNum; j++)
                         {
                             responsData = http_post_binary(fwFile, _fwUpgradeUri);
@@ -745,13 +729,28 @@ namespace G_IPCAM
                     
                     }
                 //}
-            //}
+            }
+
+            //after upgrade fw successfull Disable enable other function.
+            this.button1.Enabled = true; 
+            this.button2.Enabled = true;
+            this.button3.Enabled = true;
             Console.WriteLine("UploadFirmware thread: terminating.");
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             System.Environment.Exit(-12);
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+           //cell & element
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //cell
         }
     }
 }
