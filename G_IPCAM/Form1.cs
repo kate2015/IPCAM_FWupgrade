@@ -35,7 +35,7 @@ namespace G_IPCAM
         public String[] skuName;
         public String[] WebCam;
         public String hostIp;
-        string md_name ;
+        private string md_name ;
         
         public dynamic stuff;
         //public byte[] = G_IPCAM.Properties.Resources.;
@@ -53,7 +53,6 @@ namespace G_IPCAM
 
         Thread _recvBroadcastThread;
         public string dev_fw;
-        internal string _newip = null;
 
         public Form1()
         {
@@ -90,7 +89,6 @@ namespace G_IPCAM
             {
                 if (ipaddr[i] != null)
                 {
-                    
                     getSysInfoUri[i] = string.Format("http://{0}/cgi-bin/system.cgi", ipaddr[i]);
                     getFwInfoUri[i] = string.Format("http://{0}/cgi-bin/fw-upgrade.cgi?GetUpgradeStatus", ipaddr[i]);
 
@@ -226,7 +224,7 @@ namespace G_IPCAM
         {
 
             XmlTextReader xmlReader = new XmlTextReader(S);
-            Modify_ip IForm = new Modify_ip();
+            Modify_ip IForm = new Modify_ip(this);
             IForm.Owner = this;
             DataGridViewRow row = dataGridView1.Rows[devIdx -1];
 
@@ -453,11 +451,9 @@ namespace G_IPCAM
                 Console.WriteLine("error:{0}", ex.ToString(), "\n");
                 System.Environment.Exit(-13);
             }
-            //newsock.Bind(ipep);
 
             IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
             EndPoint Remote = (EndPoint)(sender);
-            
 
             try
             {
@@ -509,10 +505,9 @@ namespace G_IPCAM
                                     Console.WriteLine("nitaa{0} fwVersion = {1}", i + 1, (String)stuff.fwVersion);
                                     Console.WriteLine("nitaa{0} skuName = {1}", i + 1, (String)stuff.skuName);
 
-                                    //dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i, (String)stuff.ip); });
+                                    //update Form1 UI 
                                     dataGridView1.BeginInvoke((MethodInvoker)delegate () { dataGridView1.Rows.Add(i + 1, ipaddr[i + 1], mac[i + 1], skuName[i + 1], fwVersion[i + 1]); });
                                     
-
                                     Thread.Sleep(50); //sometimes will show 2
 
                                     deviceNum++; 
@@ -587,20 +582,14 @@ namespace G_IPCAM
 
             if (_uf_selectedCellCount > 0)
             {
-                Modify_ip MForm = new Modify_ip();
+                Modify_ip MForm = new Modify_ip(this);
                 DataGridViewRow row = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex];
-
-                //IForm.String1 = md_name;
-                //IForm.String1 = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells[2].ToString();
 
                 //TODO: Need Error handling
                 MForm.String1 = row.Cells[2].Value.ToString();
                 MForm.String2 = row.Cells[1].Value.ToString();  
                 MForm.SetValue();
                 MForm.Show();
-
-                //this.mdip_Thread = new Thread(new ThreadStart(this.modifyip));
-                //mdip_Thread.Start();
 
             }
             else
@@ -609,16 +598,6 @@ namespace G_IPCAM
             }
         }
 
-        /*private void modifyip() {
-            //while (_newip != null)
-            if( _modiyip)
-            {
-                //dataGridView1.BeginInvoke((MethodInvoker)delegate() { _newip = dataGridView1.Rows.Cells[1].Value.ToString(); });
-                dataGridView1.BeginInvoke((MethodInvoker)delegate() { dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells[2].Value = IForm.newIp; } ); //IForm.newIp
-                _modiyip = false;
-            }
-            
-        }*/
 
         private void button3_Click(object sender, EventArgs e)
         {
